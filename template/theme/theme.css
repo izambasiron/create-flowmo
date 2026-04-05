@@ -1,0 +1,23 @@
+/* ── Project Theme ─────────────────────────────────────
+   Override OutSystems UI variables and add custom styles here.
+   This file loads after outsystems-ui.css and grid.css.
+──────────────────────────────────────────────────────── */
+
+/* ── 1. Brand tokens ─────────────────────────────────── */
+:root {
+  /* Brand colors – change these to match your app */
+  --color-primary: #2979ff;
+  --color-secondary: #6c757d;
+  --color-success: #2e7d32;
+  --color-warning: #ed6c02;
+  --color-error: #d32f2f;
+
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 14px;
+}
+
+/* ── 2. Custom styles ────────────────────────────────── */
+/* Add custom component classes here.
+   Use named classes for button variants, dark-section overrides,
+   gradient backgrounds, etc. Keep OSUI utilities for layout/spacing. */

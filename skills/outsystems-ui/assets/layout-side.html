@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{screen-name}}</title>
+  <link rel="stylesheet" href="../theme/outsystems-ui.css" />
+  <link rel="stylesheet" href="../theme/grid.css" />
+  <link rel="stylesheet" href="../theme/theme.css" />
+</head>
+<body>
+  <!--
+    LayoutSideMenu — Vertical navigation in a left sidebar.
+    Best for: backoffice/admin apps with many pages or deep navigation.
+    
+    Structure differs from LayoutTopMenu:
+    - <aside> with the menu sits OUTSIDE .main (sibling, before .main)
+    - Header inside .main has the burger icon + app title + header-navigation
+    - On mobile: body changes to "phone portrait", burger becomes visible,
+      sidebar slides in from left via translateX, overlay appears
+  -->
+  <div class="active-screen">
+    <div data-block="Layouts.LayoutSideMenu" class="layout layout-side fixed-header">
+
+      <!-- ═══════════ SIDEBAR (outside .main) ═══════════ -->
+      <aside class="aside-navigation" role="complementary">
+        <nav class="app-menu-content display-flex" role="navigation">
+          <div class="header-logo">
+            <div class="application-name display-flex align-items-center full-height">
+              <!-- <img class="app-logo" src="logo.png" alt="" style="height: 32px;" /> -->
+              <span class="heading6 text-neutral-8">{{app-name}}</span>
+            </div>
+          </div>
+          <div class="app-menu-links" role="menubar">
+            <a class="active" href="#" role="menuitem">Home</a>
+            <a class="ThemeGrid_MarginGutter" href="#" role="menuitem">{{nav-link-2}}</a>
+            <a class="ThemeGrid_MarginGutter" href="#" role="menuitem">{{nav-link-3}}</a>
+            <a class="ThemeGrid_MarginGutter" href="#" role="menuitem">{{nav-link-4}}</a>
+          </div>
+          <div class="app-login-info">
+            <div class="user-info">
+              <span>{{user-name}}</span>
+            </div>
+          </div>
+        </nav>
+        <div class="app-menu-overlay" role="button"></div>
+      </aside>
+
+      <div class="main">
+
+        <!-- ═══════════ HEADER ═══════════ -->
+        <header role="banner" class="header">
+          <div class="header-top ThemeGrid_Container">
+            <div class="header-content display-flex">
+
+              <!-- Menu Toggle (hamburger) — visible on mobile, hidden on desktop -->
+              <div class="menu-icon" aria-label="Toggle the Menu" role="button" tabindex="0">
+                <div class="menu-icon-line"></div>
+                <div class="menu-icon-line"></div>
+                <div class="menu-icon-line"></div>
+              </div>
+
+              <!-- App Logo & Name -->
+              <div class="application-name display-flex align-items-center full-height">
+                <span class="heading6 text-neutral-8">{{app-name}}</span>
+              </div>
+
+              <!-- Header navigation (duplicate menu for desktop top bar + user info) -->
+              <div class="header-navigation">
+                <nav class="app-menu-content display-flex" role="navigation">
+                  <div class="app-menu-links" role="menubar">
+                    <!-- Same links as sidebar — shown in header on desktop -->
+                  </div>
+                  <div class="app-login-info">
+                    <div class="user-info">
+                      <div class="padding-y-base display-flex align-items-center">
+                        <span>{{user-name}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+
+            </div>
+          </div>
+        </header>
+
+        <!-- ═══════════ CONTENT ═══════════ -->
+        <div class="content">
+          <div class="main-content ThemeGrid_Container" role="main">
+
+            <div class="content-breadcrumbs"></div>
+
+            <div class="content-top display-flex align-items-center">
+              <div class="content-top-title heading1">{{page-title}}</div>
+              <div class="content-top-actions">
+                <!-- Action buttons go here -->
+              </div>
+            </div>
+
+            <div class="content-middle">
+              {{content}}
+            </div>
+
+          </div>
+
+          <footer role="contentinfo" class="content-bottom">
+            <div class="footer ThemeGrid_Container">
+              {{footer}}
+            </div>
+          </footer>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="../scripts/device-detect.js"></script>
+</body>
+</html>

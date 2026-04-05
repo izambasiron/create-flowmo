@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{screen-name}}</title>
+  <link rel="stylesheet" href="../theme/outsystems-ui.css" />
+  <link rel="stylesheet" href="../theme/grid.css" />
+  <link rel="stylesheet" href="../theme/theme.css" />
+</head>
+<body>
+  <!--
+    LayoutBlank — No header, no footer, no navigation.
+    Best for: login pages, error pages, splash screens, or any screen
+    that needs full control with zero chrome.
+    
+    This is the most minimal OutSystems layout.
+  -->
+  <div class="active-screen">
+    <div data-block="Layouts.LayoutBlank" class="layout blank">
+
+      <div class="content" role="main">
+        <div class="main-content">
+          {{content}}
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="../scripts/device-detect.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="../theme/outsystems-ui.css">
+  <link rel="stylesheet" href="../theme/grid.css">
+  <link rel="stylesheet" href="../theme/theme.css">
+  <style>
+    :root {
+      --w-fg: #171717;
+      --w-muted: #687076;
+      --w-bg: #ffffff;
+      --w-border: #e8e8e8;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --w-fg: #ededed;
+        --w-muted: #8f8f8f;
+        --w-bg: #0a0a0a;
+        --w-border: #2e2e2e;
+      }
+      .layout { background: var(--w-bg); }
+      .header { background: var(--w-bg) !important; border-bottom-color: var(--w-border) !important; }
+      .content { background: var(--w-bg); }
+      .footer { background: var(--w-bg) !important; }
+      .heading1, .heading6, .paragraph, span, a { color: var(--w-fg); }
+      .text-neutral-6 { color: var(--w-muted) !important; }
+    }
+
+    .home-hero {
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+
+    .home-hero .heading1 {
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      color: var(--w-fg);
+    }
+
+    .home-hero .paragraph {
+      color: var(--w-muted);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .home-steps {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .home-step {
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--w-border);
+      display: flex;
+      gap: 0.75rem;
+      align-items: baseline;
+    }
+
+    .home-step:last-child { border-bottom: none; }
+
+    .home-step-num {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--w-muted);
+      flex-shrink: 0;
+    }
+
+    .home-step p {
+      font-size: 0.875rem;
+      color: var(--w-fg);
+      line-height: 1.5;
+    }
+
+    .home-step code {
+      font-size: 0.8125rem;
+      color: var(--w-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="active-screen">
+    <div data-block="Layouts.LayoutTopMenu" class="layout layout-top fixed-header">
+      <div class="main">
+
+        <!-- Header -->
+        <header role="banner" class="header">
+          <div class="header-top ThemeGrid_Container">
+            <div class="header-content display-flex">
+              <div class="menu-icon" role="button" aria-label="Toggle the Menu" aria-haspopup="true">
+                <div class="menu-icon-line" aria-hidden="true"></div>
+                <div class="menu-icon-line" aria-hidden="true"></div>
+                <div class="menu-icon-line" aria-hidden="true"></div>
+              </div>
+              <div class="header-navigation">
+                <nav class="app-menu-content display-flex" role="navigation">
+                  <div class="header-logo">
+                    <div class="application-name display-flex align-items-center full-height">
+                      <span class="heading6 text-neutral-8">My App</span>
+                    </div>
+                  </div>
+                  <div class="app-menu-links" role="menubar">
+                    <a class="active" role="menuitem" href="#">Home</a>
+                  </div>
+                  <div class="app-login-info">
+                    <div class="user-info">
+                      <div class="padding-y-base display-flex align-items-center">
+                        <span>User</span>
+                      </div>
+                    </div>
+                  </div>
+                </nav>
+                <div class="app-menu-overlay" role="button" aria-label="Close Menu"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+          <div class="main-content ThemeGrid_Container" role="main">
+
+            <div class="home-hero">
+              <div class="heading1">Welcome to your app</div>
+              <p class="paragraph">This is a starter screen. Edit it, duplicate it, or replace it entirely.</p>
+
+              <div class="home-steps">
+                <div class="home-step">
+                  <span class="home-step-num">01</span>
+                  <p>Create screens as <code>.visual.html</code> files in <code>screens/</code>.</p>
+                </div>
+                <div class="home-step">
+                  <span class="home-step-num">02</span>
+                  <p>Define actions as <code>.flowchart.md</code> files in <code>logic/</code>.</p>
+                </div>
+                <div class="home-step">
+                  <span class="home-step-num">03</span>
+                  <p>Document your database in <code>data/</code> and write advanced queries in <code>data/sql/</code>.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <footer role="contentinfo" class="content-bottom">
+            <div class="footer ThemeGrid_Container">
+              <p class="paragraph text-neutral-6">Powered by Flowmo</p>
+            </div>
+          </footer>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="../scripts/device-detect.js"></script>
+</body>
+</html>

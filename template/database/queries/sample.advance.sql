@@ -5,15 +5,15 @@
 -- Use @ParamName for input parameters.
 --
 -- Run with:
---   flowmo db:query database/queries/sample.advance.sql '{"UserId": 1, "IsActive": true}'
+--   flowmo db:query database/queries/sample.advance.sql '{"UserId": "user-001"}'
 -- ============================================================
 
 SELECT
-  {Users}.[Id],
-  {Users}.[Name],
-  {Users}.[Email]
+  {User}.[Id],
+  {User}.[Name],
+  {User}.[Email],
+  {User}.[Username]
 FROM
-  {Users}
+  {User}
 WHERE
-  {Users}.[Id] = @UserId
-  AND {Users}.[IsActive] = @IsActive
+  {User}.[Id] = @UserId

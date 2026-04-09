@@ -28,8 +28,8 @@ You'll be prompted for a project name, target platform (O11 or ODC), and app typ
 ```bash
 cd my-project
 npm install
-npm exec flowmo db:setup   # provision the local PGLite database
-npm exec flowmo db:seed    # insert seed data
+npx flowmo db:setup   # provision the local PGLite database
+npx flowmo db:seed    # insert seed data
 npm run dev
 ```
 

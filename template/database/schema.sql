@@ -9,10 +9,14 @@
 -- ============================================================
 
 -- Example:
--- CREATE TABLE users (
---   id        SERIAL PRIMARY KEY,
---   name      TEXT        NOT NULL,
---   email     TEXT        NOT NULL UNIQUE,
---   is_active BOOLEAN     NOT NULL DEFAULT TRUE,
---   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- Note: 'user' is a reserved word in PostgreSQL — it must always be quoted.
+-- OutSystems User entity has: Id (GUID), Name, Email, PhotoUrl, Username.
+--
+-- CREATE TABLE "user" (
+--   id         TEXT PRIMARY KEY,
+--   name       TEXT NOT NULL,
+--   email      TEXT NOT NULL,
+--   photo_url  TEXT,
+--   username   TEXT NOT NULL,
+--   is_active  INTEGER NOT NULL DEFAULT 1
 -- );

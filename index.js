@@ -233,7 +233,7 @@ export default defineConfig({
 
     s.stop('Project scaffolded successfully!');
 
-    note(`For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nTo get started:\ncd ${projectName}\nnpm install\n\nSet up your local database:\nnpm exec flowmo db:setup\nnpm exec flowmo db:seed\n\nPreview your screens:\nnpm run dev`, 'Next Steps');
+    note(`For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nTo get started:\ncd ${projectName}\nnpm install\n\nSet up your local database:\nnpx flowmo db:setup\nnpx flowmo db:seed\n\nPreview your screens:\nnpm run dev`, 'Next Steps');
     outro(picocolors.cyan('Time to vibe code! ⚡'));
     
   } catch (err) {

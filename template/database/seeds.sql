@@ -7,7 +7,9 @@
 -- ============================================================
 
 -- Example:
--- INSERT INTO users (name, email, is_active) VALUES
---   ('Izam B.',  'izam@example.com',   TRUE),
---   ('Ana R.',   'ana@example.com',    TRUE),
---   ('Carlos M.','carlos@example.com', FALSE);
+-- Note: 'user' is a reserved word — always quote the table name.
+-- INSERT INTO "user" (id, name, email, username, is_active) VALUES
+--   ('user-001', 'Izam B.',  'izam@example.com',  'izam@example.com',  1),
+--   ('user-002', 'Ali A.',   'ali@example.com',   'ali@example.com',   1),
+--   ('user-003', 'Muthu R.', 'muthu@example.com', 'muthu@example.com', 1),
+--   ('user-004', 'Ah H.',    'ahh@example.com',   'ahk@example.com',   0);

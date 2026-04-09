@@ -268,6 +268,46 @@ If any check fails, fix the query before presenting the output.
 3. **Output Structure**: Advanced SQL queries must have an Output Structure defined. The column names in SELECT must match the Output Structure attributes.
 4. **Test Queries**: O11 allows testing SQL in Service Studio. ODC requires deployment to test. Always validate syntax for the target platform.
 5. **Reserved Words**: `Order`, `User`, `Group`, `Table` are reserved in PostgreSQL. In ODC, always double-quote these entity names.
+
+   **`User` deserves special attention** — every OutSystems project has one, and forgetting to quote it causes a syntax error. The Flowmo parser handles this automatically: `{User}` → `"user"` (quoted). However, if you write raw SQL (non-`.advance.sql`), or reference a user table alias, you must quote it yourself:
+
+   ```sql
+   -- .advance.sql (parser handles it automatically)
+   SELECT {User}.[Id], {User}.[Name], {User}.[Email]
+   FROM {User}
+   WHERE {User}.[Id] = @UserId
+   -- Parsed to: SELECT "user".id, "user".name, "user".email FROM "user" WHERE "user".id = $1
+
+   -- Raw SQL — must quote manually
+   SELECT u.id, u.name, u.email
+   FROM "user" u
+   WHERE u.id = $1
+   ```
+
+   **OutSystems User entity fields:**
+
+   | OutSystems Attribute | Type | Local column |
+   |---|---|---|
+   | `Id` | Text (GUID) | `id TEXT` |
+   | `Name` | Text | `name TEXT` |
+   | `Email` | Text  | `email TEXT` |
+   | `PhotoUrl` | Text | `photo_url TEXT` |
+   | `Username` | Text | `username TEXT` |
+
+   In Flowmo, if your project has a dedicated user table, create it directly as `"user"`:
+
+   ```sql
+   -- Simple standalone user table
+   CREATE TABLE "user" (
+     id         TEXT    PRIMARY KEY,  -- OutSystems GUID (e.g. 'user-001')
+     name       TEXT    NOT NULL,
+     email      TEXT    NOT NULL,
+     photo_url  TEXT,
+     username   TEXT    NOT NULL,
+     is_active  INTEGER NOT NULL DEFAULT 1
+   );
+   ```
+
 6. **Date Comparisons**: O11 uses `BETWEEN` or `DATEDIFF`. ODC prefers range comparisons with `>=` and `<` or `EXTRACT()`.
 7. **Aggregate Functions in WHERE**: Use `HAVING` for aggregate conditions — `WHERE` runs before `GROUP BY`.
 8. **Index Awareness**: Filter on indexed attributes when possible. In O11 check Query Analyzer; in ODC check the database logs.
@@ -351,8 +391,8 @@ After writing a query, always test it locally using `flowmo db:query` before con
 The local database must be provisioned and seeded first:
 
 ```bash
-npm exec flowmo db:setup   # drop and recreate schema from database/schema.sql
-npm exec flowmo db:seed    # insert seed data from database/seeds.sql
+npx flowmo db:setup   # drop and recreate schema from database/schema.sql
+npx flowmo db:seed    # insert seed data from database/seeds.sql
 ```
 
 Only needed once per session (or after a schema change).
@@ -361,15 +401,33 @@ Only needed once per session (or after a schema change).
 
 **Standard SQL:**
 ```bash
-npm exec flowmo db:query database/queries/my_query.sql
+npx flowmo db:query database/queries/my_query.sql
 ```
 
 **OutSystems Advanced SQL** (`.advance.sql`) with parameters:
 ```bash
-npm exec flowmo db:query database/sql/MyQuery.advance.sql '{"ParamName": "value"}'
+npx flowmo db:query database/queries/MyQuery.advance.sql '{"ParamName": "value"}'
 ```
 
 All `@ParamName` references in the file are automatically detected and mapped to positional `$1`, `$2`, … bindings. Pass every parameter the query references — missing parameters will cause a binding error.
+
+### Flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `--limit <n>` | `10` | Maximum rows to display. Increase when you expect more results. |
+| `--simple` | off | Plain `key: value` output instead of the bordered ASCII table. Useful for wide rows or piping output. |
+
+```bash
+# Show up to 50 rows
+npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50
+
+# Plain output (no table borders)
+npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --simple
+
+# Both together
+npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50 --simple
+```
 
 ### Parameter Types
 
@@ -377,16 +435,16 @@ All parameter values are passed as strings in the JSON object. The database coer
 
 ```bash
 # Integers
-npm exec flowmo db:query ... '{"UserId": "1", "MaxRecords": "10"}'
+npx flowmo db:query ... '{"UserId": "1", "MaxRecords": "10"}'
 
 # Booleans (stored as INTEGER — pass "1" or "0")
-npm exec flowmo db:query ... '{"IsActive": "1", "CanViewPrice": "0"}'
+npx flowmo db:query ... '{"IsActive": "1", "CanViewPrice": "0"}'
 
 # Empty string (for optional text filters)
-npm exec flowmo db:query ... '{"SearchTerm": ""}'
+npx flowmo db:query ... '{"SearchTerm": ""}'
 
 # "No filter" sentinel for IN-clause parameters (pass "0" to bypass)
-npm exec flowmo db:query ... '{"ProjectIds": "0", "RoleIds": "0"}'
+npx flowmo db:query ... '{"ProjectIds": "0", "RoleIds": "0"}'
 ```
 
 ### Reading the Output
@@ -412,7 +470,7 @@ When authoring or modifying a query as an agent:
 
 1. Write or update the `.sql` / `.advance.sql` file.
 2. Identify every `@ParamName` in the file.
-3. Run `npm exec flowmo db:query <file> '<params-json>'` with all parameters supplied.
+3. Run `npx flowmo db:query <file> '<params-json>'` with all parameters supplied.
 4. Confirm the output matches the expected shape (correct columns, at least 1 row if seed data covers it).
 5. If 0 rows: verify seed data contains matching records, or relax filter parameters (use `"0"` for ID filters, `""` for text filters).
 6. Only mark the query ready once it returns the expected result.

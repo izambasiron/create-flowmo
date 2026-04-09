@@ -1,0 +1,18 @@
+-- ============================================================
+-- schema.sql — Single source of truth for your local database
+-- ============================================================
+-- Paste or write your PostgreSQL CREATE TABLE statements here.
+-- Run `flowmo db:setup` to drop and recreate all tables.
+--
+-- Tip: Use Mentor AI or an external vision model to generate
+-- this from your ODC data model. See /prompts/odc-to-schema.txt.
+-- ============================================================
+
+-- Example:
+-- CREATE TABLE users (
+--   id        SERIAL PRIMARY KEY,
+--   name      TEXT        NOT NULL,
+--   email     TEXT        NOT NULL UNIQUE,
+--   is_active BOOLEAN     NOT NULL DEFAULT TRUE,
+--   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- );

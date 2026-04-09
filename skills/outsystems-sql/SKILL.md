@@ -3,9 +3,10 @@ name: outsystems-sql
 description: >-
   OutSystems SQL query authoring for both O11 (MSSQL) and ODC (PostgreSQL).
   Covers entity references, aggregate syntax, advanced SQL, joins, functions,
-  parameterized queries, and platform-specific syntax differences. Use when the
-  developer is writing SQL queries, creating aggregates, or working with data
-  retrieval logic in OutSystems.
+  parameterized queries, and platform-specific syntax differences. Also handles
+  converting ODC data models into Flowmo-compatible PostgreSQL schemas. Use when
+  the developer is writing SQL queries, creating aggregates, working with data
+  retrieval logic, or needs to mirror an ODC schema locally.
 compatibility: Designed for OutSystems Service Studio. Requires knowledge of target platform (O11 or ODC).
 metadata:
   version: "1.0"
@@ -33,7 +34,7 @@ WHERE {Entity}.[IsActive] = 1
 ```
 - Entities: `{EntityName}` in curly braces
 - Attributes: `[AttributeName]` in square brackets
-- Boolean: `1` / `0`
+- Boolean: `1` / `0` (stored as integer)
 
 ### ODC (PostgreSQL)
 ```sql
@@ -53,7 +54,7 @@ WHERE entity."IsActive" = true
 | Top N rows | `SELECT TOP N ...` | `SELECT ... LIMIT N` |
 | Null coalesce | `ISNULL(x, default)` | `COALESCE(x, default)` |
 | String concat | `'a' + 'b'` | `'a' \|\| 'b'` |
-| Boolean values | `1` / `0` | `true` / `false` |
+| Boolean values | `1` / `0` (integer) | `1` / `0` (integer — stored as INTEGER, not BOOLEAN) |
 | Identity insert | `SCOPE_IDENTITY()` | `RETURNING Id` |
 | Date diff | `DATEDIFF(day, d1, d2)` | `d2 - d1` or `EXTRACT(...)` |
 | Substring | `SUBSTRING(s, start, len)` | `SUBSTRING(s FROM start FOR len)` |
@@ -129,8 +130,8 @@ WHERE [Id] = @Id
 **ODC:**
 ```sql
 UPDATE entity
-SET "IsActive" = false, "DeletedDate" = NOW()
-WHERE "Id" = @Id
+SET is_active = 0, deleted_date = NOW()
+WHERE id = @Id
 ```
 
 ### Aggregation with Group By
@@ -270,3 +271,71 @@ If any check fails, fix the query before presenting the output.
 6. **Date Comparisons**: O11 uses `BETWEEN` or `DATEDIFF`. ODC prefers range comparisons with `>=` and `<` or `EXTRACT()`.
 7. **Aggregate Functions in WHERE**: Use `HAVING` for aggregate conditions — `WHERE` runs before `GROUP BY`.
 8. **Index Awareness**: Filter on indexed attributes when possible. In O11 check Query Analyzer; in ODC check the database logs.
+
+---
+
+## ODC to Flowmo Schema (AI Bridge)
+
+When a developer wants to mirror their ODC data model into a local Flowmo project, generate a PostgreSQL `CREATE TABLE` script compatible with PGLite. This is the primary way to set up `database/schema.sql` before running `flowmo db:setup`.
+
+### Conversion Rules
+
+1. Use **lowercase snake_case** for all table and column names (`IsActive` → `is_active`).
+2. Map OutSystems types to PostgreSQL types:
+
+   | OutSystems Type | PostgreSQL Type |
+   |---|---|
+   | Text | `TEXT` |
+   | Integer | `INTEGER` |
+   | Long Integer | `BIGINT` |
+   | Decimal | `NUMERIC(18, 2)` |
+   | Boolean | `INTEGER` (use `1`/`0` to match OutSystems O11 storage) |
+   | Date Time | `TIMESTAMPTZ` |
+   | Date | `DATE` |
+   | Binary Data | `BYTEA` |
+   | Email | `TEXT` |
+   | Phone Number | `TEXT` |
+   | Currency | `NUMERIC(18, 2)` |
+
+3. Every table gets `id SERIAL PRIMARY KEY` as the first column (or `BIGSERIAL` if the ODC identifier is Long Integer).
+4. OutSystems foreign key attributes (e.g., `UserId`) become `INTEGER REFERENCES parent_table(id)`.
+5. OutSystems attributes are **NOT NULL by default** — apply `NOT NULL` unless the attribute is explicitly optional.
+6. Add `DEFAULT 1` / `DEFAULT 0` for Boolean (INTEGER) attributes that have a default set.
+7. Add `DEFAULT NOW()` for Date Time attributes named `CreatedAt`, `CreatedOn`, or similar creation timestamps.
+8. Output **only raw SQL** — no markdown fences, no explanations, no `CREATE SCHEMA` statements.
+9. Precede each table with a comment: `-- Table: table_name`.
+
+### Example
+
+**Input (ODC Entity):**
+```
+Entity: User
+  - Id (Long Integer, Identifier)
+  - Name (Text, 50)
+  - Email (Text, 250)
+  - IsActive (Boolean, Default: True)
+  - CreatedAt (Date Time)
+```
+
+**Output:**
+```sql
+-- Table: users
+CREATE TABLE users (
+  id         BIGSERIAL    PRIMARY KEY,
+  name       TEXT         NOT NULL,
+  email      TEXT         NOT NULL,
+  is_active  INTEGER      NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+```
+
+### Workflow
+
+When asked to generate a Flowmo schema from an ODC data model:
+
+1. Ask the developer to describe their entities or paste the ODC diagram description. Accept screenshots too — extract entity names and attributes from them.
+2. Apply all conversion rules above.
+3. Output the raw SQL directly — it can be pasted into `database/schema.sql`.
+4. Remind them to run `flowmo db:setup` after saving.
+
+> **Tip for users without direct DB access:** Ask OutSystems Mentor AI to generate a PostgreSQL CREATE TABLE script from your data model, then paste it into `database/schema.sql` and adjust as needed using this skill.

@@ -75,7 +75,7 @@ async function init() {
   try {
     // Scaffold basic structure
     await fs.ensureDir(path.join(projectPath, '.agents'));
-    await fs.ensureDir(path.join(projectPath, 'data/sql'));
+    await fs.ensureDir(path.join(projectPath, 'database/queries'));
     await fs.ensureDir(path.join(projectPath, 'logic'));
     await fs.ensureDir(path.join(projectPath, 'screens'));
     await fs.ensureDir(path.join(projectPath, 'scripts'));
@@ -90,7 +90,7 @@ async function init() {
     await fs.copy(path.join(templateDir, 'theme'), path.join(projectPath, 'theme'));
     await fs.copy(path.join(templateDir, 'scripts'), path.join(projectPath, 'scripts'));
     await fs.copy(path.join(templateDir, 'screens'), path.join(projectPath, 'screens'));
-    await fs.copy(path.join(templateDir, 'data'), path.join(projectPath, 'data'));
+    await fs.copy(path.join(templateDir, 'database'), path.join(projectPath, 'database'));
     await fs.copy(path.join(templateDir, 'logic'), path.join(projectPath, 'logic'));
 
     // Generate package.json for the scaffolded project
@@ -103,6 +103,9 @@ async function init() {
         'dev:agent': 'vite',
         build: 'vite build',
         preview: 'vite preview',
+      },
+      dependencies: {
+        flowmo: 'latest',
       },
       devDependencies: {
         vite: '^6.0.0',
@@ -118,18 +121,47 @@ import { fileURLToPath } from 'url';
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
 
+// Scan screens/ and one level of subdirectories for .html files.
+function discoverScreens(screensDir) {
+  const entries = [];
+  for (const entry of readdirSync(screensDir, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name.endsWith('.html')) {
+      entries.push({ href: \`screens/\${entry.name}\`, file: entry.name, folder: null });
+    } else if (entry.isDirectory()) {
+      try {
+        for (const sub of readdirSync(resolve(screensDir, entry.name), { withFileTypes: true })) {
+          if (sub.isFile() && sub.name.endsWith('.html')) {
+            entries.push({ href: \`screens/\${entry.name}/\${sub.name}\`, file: sub.name, folder: entry.name });
+          }
+        }
+      } catch { /* skip unreadable dirs */ }
+    }
+  }
+  return entries.sort((a, b) => a.href.localeCompare(b.href));
+}
+
 function screenListPlugin() {
+  const screensDir = resolve(__dirname, 'screens');
   return {
     name: 'screen-list',
+    configureServer(server) {
+      server.watcher.add(screensDir);
+      const reload = (file) => {
+        if (file.startsWith(screensDir) && file.endsWith('.html')) {
+          server.ws.send({ type: 'full-reload' });
+        }
+      };
+      server.watcher.on('add', reload);
+      server.watcher.on('unlink', reload);
+    },
     transformIndexHtml(html) {
-      const files = readdirSync(resolve(__dirname, 'screens'))
-        .filter(f => f.endsWith('.html'))
-        .sort();
-      const links = files.map(file => {
+      const entries = discoverScreens(screensDir);
+      const links = entries.map(({ href, file, folder }) => {
         const name = file.replace(/\\.visual\\.html$/, '').replace(/\\.html$/, '');
-        return \`<a class="welcome-link" href="screens/\${file}">
-          <h2>\${name}</h2>
-          <p>\${file}</p>
+        const title = folder ? \`\${folder} / \${name}\` : name;
+        return \`<a class="welcome-link" href="\${href}">
+          <h2>\${title}</h2>
+          <p>\${href.replace('screens/', '')}</p>
         </a>\`;
       }).join('\\n');
       return html.replace('<!-- SCREENS_LIST -->', links);
@@ -137,13 +169,13 @@ function screenListPlugin() {
   };
 }
 
-// Auto-discover all .html files in screens/
-const screens = readdirSync(resolve(__dirname, 'screens'))
-  .filter(f => f.endsWith('.html'))
-  .reduce((entries, file) => {
-    entries[file.replace('.html', '')] = resolve(__dirname, 'screens', file);
-    return entries;
-  }, {});
+// Auto-discover all .html files in screens/ (including one level of subdirs) for the build.
+const screensDir = resolve(__dirname, 'screens');
+const screens = discoverScreens(screensDir).reduce((entries, { href, folder, file }) => {
+  const key = folder ? \`\${folder}/\${file.replace('.html', '')}\` : file.replace('.html', '');
+  entries[key] = resolve(__dirname, href);
+  return entries;
+}, {});
 
 export default defineConfig({
   root: '.',
@@ -201,7 +233,7 @@ export default defineConfig({
 
     s.stop('Project scaffolded successfully!');
 
-    note(`For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nOptional — to preview locally:\ncd ${projectName}\nnpm install\nnpm run dev`, 'Next Steps');
+    note(`For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nTo get started:\ncd ${projectName}\nnpm install\n\nSet up your local database:\nnpm exec flowmo db:setup\nnpm exec flowmo db:seed\n\nPreview your screens:\nnpm run dev`, 'Next Steps');
     outro(picocolors.cyan('Time to vibe code! ⚡'));
     
   } catch (err) {

@@ -1,0 +1,13 @@
+-- ============================================================
+-- seeds.sql — Realistic dummy data for UI prototyping
+-- ============================================================
+-- Add INSERT statements here.
+-- Run `flowmo db:seed` to insert this data into your local DB.
+-- Your schema must already be set up via `flowmo db:setup`.
+-- ============================================================
+
+-- Example:
+-- INSERT INTO users (name, email, is_active) VALUES
+--   ('Izam B.',  'izam@example.com',   TRUE),
+--   ('Ana R.',   'ana@example.com',    TRUE),
+--   ('Carlos M.','carlos@example.com', FALSE);

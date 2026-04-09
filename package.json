@@ -1,6 +1,6 @@
 {
   "name": "create-flowmo",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Scaffold an OutSystems-Lite project with screens, data, logic, and built-in agent skills",
   "type": "module",
   "license": "MIT",

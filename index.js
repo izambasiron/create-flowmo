@@ -99,7 +99,8 @@ async function init() {
       private: true,
       type: 'module',
       scripts: {
-        dev: 'vite',
+        dev: 'vite --open',
+        'dev:agent': 'vite',
         build: 'vite build',
         preview: 'vite preview',
       },
@@ -117,6 +118,25 @@ import { fileURLToPath } from 'url';
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
 
+function screenListPlugin() {
+  return {
+    name: 'screen-list',
+    transformIndexHtml(html) {
+      const files = readdirSync(resolve(__dirname, 'screens'))
+        .filter(f => f.endsWith('.html'))
+        .sort();
+      const links = files.map(file => {
+        const name = file.replace(/\\.visual\\.html$/, '').replace(/\\.html$/, '');
+        return \`<a class="welcome-link" href="screens/\${file}">
+          <h2>\${name}</h2>
+          <p>\${file}</p>
+        </a>\`;
+      }).join('\\n');
+      return html.replace('<!-- SCREENS_LIST -->', links);
+    },
+  };
+}
+
 // Auto-discover all .html files in screens/
 const screens = readdirSync(resolve(__dirname, 'screens'))
   .filter(f => f.endsWith('.html'))
@@ -127,6 +147,7 @@ const screens = readdirSync(resolve(__dirname, 'screens'))
 
 export default defineConfig({
   root: '.',
+  plugins: [screenListPlugin()],
   build: {
     rollupOptions: {
       input: {
@@ -138,6 +159,39 @@ export default defineConfig({
 });
 `;
     await fs.writeFile(path.join(projectPath, 'vite.config.js'), viteConfig);
+
+    // Scaffold .vscode/launch.json so VS Code and agents know how to run the project
+    const launchConfig = {
+      version: '0.2.0',
+      configurations: [
+        {
+          name: 'Start Dev Server (Vite)',
+          type: 'node',
+          request: 'launch',
+          runtimeExecutable: 'npm',
+          runtimeArgs: ['run', 'dev'],
+          cwd: '${workspaceFolder}',
+          console: 'integratedTerminal',
+          skipFiles: ['<node_internals>/**'],
+          preLaunchTask: 'npm: install',
+        },
+      ],
+    };
+    const tasksConfig = {
+      version: '2.0.0',
+      tasks: [
+        {
+          label: 'npm: install',
+          type: 'shell',
+          command: 'npm install',
+          options: { cwd: '${workspaceFolder}' },
+          presentation: { reveal: 'silent', panel: 'shared', close: true },
+        },
+      ],
+    };
+    await fs.ensureDir(path.join(projectPath, '.vscode'));
+    await fs.writeJson(path.join(projectPath, '.vscode', 'launch.json'), launchConfig, { spaces: 2 });
+    await fs.writeJson(path.join(projectPath, '.vscode', 'tasks.json'), tasksConfig, { spaces: 2 });
 
     // Copy root index.html and inject project name
     const safeName = projectName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

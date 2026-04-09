@@ -49,7 +49,7 @@ The scaffolded project also includes Copilot skills that understand OutSystems U
 ## Links and Support
 
 - Web: [flowmo.lol](https://flowmo.lol)
-- Issues: [GitHub Issues](https://github.com/izambasiron/flowmo-lol-flowchart-editor/issues)
+- Issues: [GitHub Issues](https://github.com/izambasiron/create-flowmo/issues)
 - Email: [support@flowmo.lol](mailto:support@flowmo.lol)
 - Support model: best-effort, no response-time guarantee
 

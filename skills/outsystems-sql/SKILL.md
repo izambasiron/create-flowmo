@@ -392,7 +392,16 @@ The local database must be provisioned and seeded first:
 
 ```bash
 npx flowmo db:setup   # drop and recreate schema from database/schema.sql
-npx flowmo db:seed    # insert seed data from database/seeds.sql
+npx flowmo db:seed    # insert seed data (auto-discovers database/seeds/ or database/seeds.sql)
+```
+
+Or use `db:reset` to do both in one step:
+
+```bash
+npx flowmo db:reset --seed
+
+# With an explicit seed list:
+npx flowmo db:reset --seed database/seeds/01_users.sql database/seeds/02_products.sql
 ```
 
 Only needed once per session (or after a schema change).
@@ -410,6 +419,14 @@ npx flowmo db:query database/queries/MyQuery.advance.sql '{"ParamName": "value"}
 ```
 
 All `@ParamName` references in the file are automatically detected and mapped to positional `$1`, `$2`, … bindings. Pass every parameter the query references — missing parameters will cause a binding error.
+
+**Inline SQL** (quick spot-checks, no file needed):
+```bash
+npx flowmo db:query "SELECT * FROM users"
+npx flowmo db:query "SELECT COUNT(*) FROM orders WHERE is_active = 1"
+```
+
+Inline mode is param-free. For parameterised or OutSystems Advanced SQL queries, always use a file.
 
 ### Flags
 

@@ -29,7 +29,9 @@
   },
   "files": [
     "index.js",
+    "src",
     "skills",
+    "skills-o11",
     "template"
   ],
   "scripts": {

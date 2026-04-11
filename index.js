@@ -4,6 +4,7 @@ import picocolors from 'picocolors';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { validateProjectName, sanitizeProjectName, buildPackageJson } from './src/lib.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,10 +29,7 @@ async function init() {
   const projectName = await text({
     message: 'What is your project name?',
     placeholder: 'my-vibe-module',
-    validate: (value) => {
-      if (!value) return 'Please enter a name.';
-      if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Name can only contain letters, numbers, hyphens, and underscores.';
-    },
+    validate: validateProjectName,
   });
 
   if (isCancel(projectName)) {
@@ -94,23 +92,7 @@ async function init() {
     await fs.copy(path.join(templateDir, 'logic'), path.join(projectPath, 'logic'));
 
     // Generate package.json for the scaffolded project
-    const pkg = {
-      name: projectName,
-      private: true,
-      type: 'module',
-      scripts: {
-        dev: 'vite --open',
-        'dev:agent': 'vite',
-        build: 'vite build',
-        preview: 'vite preview',
-      },
-      dependencies: {
-        flowmo: 'latest',
-      },
-      devDependencies: {
-        vite: '^6.0.0',
-      },
-    };
+    const pkg = buildPackageJson(projectName);
     await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
 
     // Generate vite config for multi-page HTML
@@ -226,7 +208,7 @@ export default defineConfig({
     await fs.writeJson(path.join(projectPath, '.vscode', 'tasks.json'), tasksConfig, { spaces: 2 });
 
     // Copy root index.html and inject project name
-    const safeName = projectName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const safeName = sanitizeProjectName(projectName);
     let indexHtml = await fs.readFile(path.join(templateDir, 'index.html'), 'utf-8');
     indexHtml = indexHtml.replaceAll('{{PROJECT_NAME}}', safeName);
     await fs.writeFile(path.join(projectPath, 'index.html'), indexHtml);

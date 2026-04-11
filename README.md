@@ -1,6 +1,8 @@
 # create-flowmo
 
-Scaffold an OutSystems-Lite project with screens, a local SQL database, logic flows, and built-in agent skills for AI-assisted prototyping.
+Scaffold an OutSystems-aligned vibe coding project with screens, a local SQL database, logic flows, and built-in agent skills for AI-assisted prototyping.
+
+`create-flowmo` is the starting point of the Flowmo ecosystem. It sets up everything an AI agent needs to understand and assist you within the OutSystems paradigm — from file structure to expert skills.
 
 ## Quick Start
 
@@ -18,10 +20,11 @@ You'll be prompted for a project name, target platform (O11 or ODC), and app typ
 
 - `screens/` — `.visual.html` starter screen with OutSystems UI layout
 - `database/` — `schema.sql`, `seeds.sql`, and a `queries/` folder for `.sql` and `.advance.sql` files
-- `logic/` — Server action flowcharts
+- `logic/` — Universal logic flowcharts (Client, Server, Service, or Data Actions)
 - `scripts/` — Custom scripts
 - `theme/` — OutSystems UI CSS and custom theme
-- `.agents/skills/` — Copilot skills for OutSystems UI, SQL, and logic authoring
+- `.agents/skills/` — **Agent Skills**: Pre-packed expert knowledge (compliant with [agentskills.io](https://agentskills.io)) that teaches AI agents how to build for OutSystems.
+
 
 ## After Scaffolding
 

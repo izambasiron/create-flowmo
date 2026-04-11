@@ -12,7 +12,7 @@ const TMP_DIR = path.join(REPO_ROOT, '.tmp-test-scaffold');
 // ---------------------------------------------------------------------------
 // Helpers — mirrors the scaffold logic in index.js without prompts
 // ---------------------------------------------------------------------------
-async function scaffold(projectName) {
+async function scaffold(projectName, platform = 'ODC') {
   const projectPath = path.join(TMP_DIR, projectName);
 
   await fs.ensureDir(path.join(projectPath, '.agents'));
@@ -25,13 +25,18 @@ async function scaffold(projectName) {
   const bundledSkills = path.join(REPO_ROOT, 'skills');
   await fs.copy(bundledSkills, path.join(projectPath, '.agents/skills'));
 
+  if (platform === 'O11') {
+    const o11Skills = path.join(REPO_ROOT, 'skills-o11');
+    await fs.copy(o11Skills, path.join(projectPath, '.agents/skills'));
+  }
+
   await fs.copy(path.join(TEMPLATE_DIR, 'theme'), path.join(projectPath, 'theme'));
   await fs.copy(path.join(TEMPLATE_DIR, 'scripts'), path.join(projectPath, 'scripts'));
   await fs.copy(path.join(TEMPLATE_DIR, 'screens'), path.join(projectPath, 'screens'));
   await fs.copy(path.join(TEMPLATE_DIR, 'database'), path.join(projectPath, 'database'));
   await fs.copy(path.join(TEMPLATE_DIR, 'logic'), path.join(projectPath, 'logic'));
 
-  const pkg = buildPackageJson(projectName);
+  const pkg = buildPackageJson(projectName, 'ODC', 'reactive');
   await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
 
   // Write a minimal vite.config.js (content is tested separately via the template string)
@@ -73,6 +78,14 @@ describe('scaffold integration', () => {
 
   it('copies agent skills into .agents/skills/', async () => {
     expect(await fs.pathExists(path.join(projectPath, '.agents/skills'))).toBe(true);
+  });
+
+  it('includes the outsystems-sql skill for ODC projects', async () => {
+    expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-sql'))).toBe(true);
+  });
+
+  it('does not include the outsystems-sql-o11 skill for ODC projects', async () => {
+    expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-sql-o11'))).toBe(false);
   });
 
   it('generates a valid package.json with the correct name', async () => {
@@ -121,5 +134,30 @@ describe('scaffold integration', () => {
   it('copies the starter logic files', async () => {
     const files = await fs.readdir(path.join(projectPath, 'logic'));
     expect(files.length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// O11-specific scaffold tests
+// ---------------------------------------------------------------------------
+describe('scaffold integration — O11', () => {
+  let projectPath;
+
+  beforeEach(async () => {
+    await fs.ensureDir(TMP_DIR);
+    projectPath = await scaffold('test-project-o11', 'O11');
+  });
+
+  afterEach(async () => {
+    await fs.remove(TMP_DIR);
+  });
+
+  it('includes all base skills', async () => {
+    expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-sql'))).toBe(true);
+    expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-ui'))).toBe(true);
+  });
+
+  it('includes the outsystems-sql-o11 add-on skill', async () => {
+    expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-sql-o11'))).toBe(true);
   });
 });

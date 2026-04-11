@@ -68,22 +68,32 @@ describe('sanitizeProjectName', () => {
 // ---------------------------------------------------------------------------
 describe('buildPackageJson', () => {
   it('sets the correct project name', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.name).toBe('my-app');
   });
 
   it('marks the package as private', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.private).toBe(true);
   });
 
   it('uses ESM module type', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.type).toBe('module');
   });
 
+  it('embeds the platform in the flowmo config field', () => {
+    expect(buildPackageJson('my-app', 'ODC', 'reactive').flowmo.platform).toBe('ODC');
+    expect(buildPackageJson('my-app', 'O11', 'reactive').flowmo.platform).toBe('O11');
+  });
+
+  it('embeds the appType in the flowmo config field', () => {
+    expect(buildPackageJson('my-app', 'ODC', 'reactive').flowmo.appType).toBe('reactive');
+    expect(buildPackageJson('my-app', 'ODC', 'mobile').flowmo.appType).toBe('mobile');
+  });
+
   it('includes the expected dev scripts', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.scripts.dev).toBe('vite --open');
     expect(pkg.scripts['dev:agent']).toBe('vite');
     expect(pkg.scripts.build).toBe('vite build');
@@ -91,18 +101,18 @@ describe('buildPackageJson', () => {
   });
 
   it('lists flowmo as a runtime dependency', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.dependencies.flowmo).toBe('latest');
   });
 
   it('lists vite as a dev dependency', () => {
-    const pkg = buildPackageJson('my-app');
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.devDependencies.vite).toMatch(/^\^6/);
   });
 
   it('produces independent objects for different project names', () => {
-    const pkgA = buildPackageJson('alpha');
-    const pkgB = buildPackageJson('beta');
+    const pkgA = buildPackageJson('alpha', 'ODC', 'reactive');
+    const pkgB = buildPackageJson('beta', 'O11', 'mobile');
     expect(pkgA.name).toBe('alpha');
     expect(pkgB.name).toBe('beta');
   });

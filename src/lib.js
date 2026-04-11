@@ -31,13 +31,19 @@ export function sanitizeProjectName(name) {
 /**
  * Builds the package.json object for the scaffolded project.
  * @param {string} projectName
+ * @param {'ODC'|'O11'} platform
+ * @param {'reactive'|'mobile'} appType
  * @returns {object}
  */
-export function buildPackageJson(projectName) {
+export function buildPackageJson(projectName, platform, appType) {
   return {
     name: projectName,
     private: true,
     type: 'module',
+    flowmo: {
+      platform,
+      appType,
+    },
     scripts: {
       dev: 'vite --open',
       'dev:agent': 'vite',

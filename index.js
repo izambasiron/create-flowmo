@@ -23,7 +23,7 @@ async function init() {
      \\/__/     \\/__/         \\/__/
 `));
 
-  intro(picocolors.bgCyan(picocolors.black(' Flowmo: Scaffold an OutSystems-Lite project with screens, data models, logic flows, and built-in agent skills for AI-assisted prototyping. ')));
+  intro(picocolors.bgCyan(picocolors.black(' Flowmo: Scaffold an OutSystems-aligned vibe coding project with screens, a local SQL database, logic flows, and built-in agent skills. ')));
 
   // 1. Project Name Prompt
   const projectName = await text({
@@ -42,13 +42,22 @@ async function init() {
     message: 'Which OutSystems platform are you targeting?',
     options: [
       { value: 'ODC', label: 'OutSystems Developer Cloud (PostgreSQL)' },
-      { value: 'O11', label: 'OutSystems 11 (T-SQL/MSSQL)' },
+      { value: 'O11', label: 'OutSystems 11 (T-SQL/MSSQL)  ⚠  SQL validation uses PostgreSQL syntax locally' },
     ],
   });
 
   if (isCancel(platform)) {
     outro('Cancelled.');
     process.exit(0);
+  }
+
+  if (platform === 'O11') {
+    note(
+      'The local database runs on PGLite (PostgreSQL).\n' +
+      'SQL queries written here use PostgreSQL syntax and will need\n' +
+      'to be adapted for T-SQL before use in OutSystems 11.',
+      'SQL Compatibility Notice'
+    );
   }
 
   // 3. App Type Selection
@@ -66,7 +75,7 @@ async function init() {
   }
 
   const s = spinner();
-  s.start('Scaffolding your OutSystems-Lite environment...');
+  s.start('Scaffolding your project...');
 
   const projectPath = path.join(process.cwd(), projectName);
 
@@ -83,6 +92,12 @@ async function init() {
     const bundledSkills = path.join(__dirname, 'skills');
     await fs.copy(bundledSkills, path.join(projectPath, '.agents/skills'));
 
+    // Copy platform-specific add-on skills
+    if (platform === 'O11') {
+      const o11Skills = path.join(__dirname, 'skills-o11');
+      await fs.copy(o11Skills, path.join(projectPath, '.agents/skills'));
+    }
+
     // Copy starter template files (CSS, starter screen, data, logic)
     const templateDir = path.join(__dirname, 'template');
     await fs.copy(path.join(templateDir, 'theme'), path.join(projectPath, 'theme'));
@@ -92,7 +107,7 @@ async function init() {
     await fs.copy(path.join(templateDir, 'logic'), path.join(projectPath, 'logic'));
 
     // Generate package.json for the scaffolded project
-    const pkg = buildPackageJson(projectName);
+    const pkg = buildPackageJson(projectName, platform, appType);
     await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
 
     // Generate vite config for multi-page HTML
@@ -215,7 +230,14 @@ export default defineConfig({
 
     s.stop('Project scaffolded successfully!');
 
-    note(`For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nTo get started:\ncd ${projectName}\nnpm install\n\nSet up your local database:\nnpx flowmo db:setup\nnpx flowmo db:seed\n\nPreview your screens:\nnpm run dev`, 'Next Steps');
+    const sqlNote = platform === 'O11'
+      ? '\nSet up your local database (PostgreSQL syntax — adapt to T-SQL for O11):\nnpx flowmo db:setup\nnpx flowmo db:seed'
+      : '\nSet up your local database:\nnpx flowmo db:setup\nnpx flowmo db:seed';
+
+    note(
+      `For the full visual editing experience, install the Flowmo Extension Pack in VS Code.\n\nTo get started:\ncd ${projectName}\nnpm install\n${sqlNote}\n\nPreview your screens:\nnpm run dev`,
+      'Next Steps'
+    );
     outro(picocolors.cyan('Time to vibe code! ⚡'));
     
   } catch (err) {

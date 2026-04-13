@@ -16,7 +16,23 @@ Or equivalently:
 npm create flowmo
 ```
 
-You'll be prompted for a project name, target platform (O11 or ODC), and app type. The CLI then scaffolds a project with:
+You'll be prompted for a project name, target platform (O11 or ODC), and app type. All three can be passed as arguments to skip the prompts:
+
+```bash
+# Positional argument skips the name prompt
+npx create-flowmo my-project
+
+# Flags skip their respective prompts (any combination works)
+npx create-flowmo my-project --odc --reactive
+npx create-flowmo my-project --o11 --mobile
+npx create-flowmo --odc          # prompts for name and app type
+npx create-flowmo my-project --mobile  # prompts for platform only
+```
+
+**Platform flags:** `--odc` (OutSystems Developer Cloud), `--o11` (OutSystems 11)  
+**App type flags:** `--reactive` (Reactive Web App), `--mobile` (Mobile App)
+
+The CLI then scaffolds a project with:
 
 - `screens/` — `.visual.html` starter screen with OutSystems UI layout
 - `database/` — `schema.sql`, `seeds.sql`, and a `queries/` folder for `.sql` and `.advance.sql` files

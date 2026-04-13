@@ -20,10 +20,10 @@ metadata:
 Before writing any SQL, determine the target platform:
 
 - **O11 (OutSystems 11)** — Uses Microsoft SQL Server syntax (T-SQL)
-- **ODC (OutSystems Developer Cloud)** — SQL nodes use the same `{Entity}.[Attribute]` notation as O11. ODC Studio selects the execution mode automatically:
-  - **Internal entities only** → executes with PostgreSQL-dialect functions/clauses (`NOW()`, `LIMIT`, `||`, `RANDOM()`, etc.)
-  - **External entities (Data Fabric) or mixed** → executes via ANSI-92 normalization; same notation applies
-  - You cannot select the mode manually; the notation is identical in both cases
+- **ODC (OutSystems Developer Cloud)** — SQL nodes use `{Entity}.[Attribute]` notation (same as O11) but ODC has **two sub-modes** that ODC Studio selects automatically:
+  - **Internal entities only** (native ODC entities) → PostgreSQL-dialect SQL. Functions and clauses use PostgreSQL syntax: `LIMIT`, `||`, `RANDOM()`, `NOW()`, etc. LIKE on text columns requires `caseaccent_normalize()`.
+  - **External entities (Data Fabric) or mixed** → ANSI-92 syntax. ODC normalizes and translates queries to the target system's dialect. Qualifying column lists with `{Entity}.[Attr]` notation is recommended.
+  - You cannot select the sub-mode manually — ODC Studio switches automatically based on the entities in your query.
 
 Ask the developer which platform they are targeting if not already clear. Despite the shared notation, function and clause differences cause runtime errors if O11 and ODC syntax is mixed.
 
@@ -39,7 +39,7 @@ WHERE {Entity}.[IsActive] = 1
 - Attributes: `[AttributeName]` in square brackets
 - Boolean: `1` / `0` (stored as integer)
 
-### ODC (Aurora PostgreSQL)
+### ODC (Internal entities — PostgreSQL dialect)
 ```sql
 SELECT {Entity}.[Attribute1], {Entity}.[Attribute2]
 FROM {Entity}
@@ -50,7 +50,7 @@ WHERE {Entity}.[IsActive] = 1
 - Boolean: `1` / `0` (stored as integer, same as O11)
 - `SELECT *` is **not valid** — always qualify as `SELECT {Entity}.*`
 - Functions/clauses use PostgreSQL syntax: `NOW()`, `LIMIT`, `||`, `RANDOM()`, etc.
-- For external entities (ANSI-92 mode), qualifying column lists as `{Entity}.[Attr]` is recommended
+- For external entities (Data Fabric), ODC Studio switches to ANSI-92 mode automatically — same notation, but qualifying column lists with `{Entity}.[Attr]` is recommended
 
 ## Syntax Differences Quick Reference
 

@@ -4,7 +4,29 @@ import picocolors from 'picocolors';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { parseArgs } from 'util';
 import { validateProjectName, sanitizeProjectName, buildPackageJson } from './src/lib.js';
+
+const { values: flags, positionals } = parseArgs({
+  args: process.argv.slice(2),
+  options: {
+    odc:      { type: 'boolean' },
+    o11:      { type: 'boolean' },
+    reactive: { type: 'boolean' },
+    mobile:   { type: 'boolean' },
+  },
+  allowPositionals: true,
+  strict: false,
+});
+
+if (flags.odc && flags.o11) {
+  console.error('Cannot use --odc and --o11 together.');
+  process.exit(1);
+}
+if (flags.reactive && flags.mobile) {
+  console.error('Cannot use --reactive and --mobile together.');
+  process.exit(1);
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -25,30 +47,47 @@ async function init() {
 
   intro(picocolors.bgCyan(picocolors.black(' Flowmo: Scaffold an OutSystems-aligned vibe coding project with screens, a local SQL database, logic flows, and built-in agent skills. ')));
 
-  // 1. Project Name Prompt
-  const projectName = await text({
-    message: 'What is your project name?',
-    placeholder: 'my-vibe-module',
-    validate: validateProjectName,
-  });
+  // 1. Project Name (positional arg or prompt)
+  const cliArg = positionals[0]?.trim();
+  let projectName;
 
-  if (isCancel(projectName)) {
-    outro('Cancelled.');
-    process.exit(0);
+  if (cliArg) {
+    const validationError = validateProjectName(cliArg);
+    if (validationError) {
+      outro(picocolors.red(`Invalid project name "${cliArg}": ${validationError}`));
+      process.exit(1);
+    }
+    projectName = cliArg;
+  } else {
+    projectName = await text({
+      message: 'What is your project name?',
+      placeholder: 'my-vibe-module',
+      validate: validateProjectName,
+    });
+
+    if (isCancel(projectName)) {
+      outro('Cancelled.');
+      process.exit(0);
+    }
   }
 
-  // 2. Target Environment Selection
-  const platform = await select({
-    message: 'Which OutSystems platform are you targeting?',
-    options: [
-      { value: 'ODC', label: 'OutSystems Developer Cloud (PostgreSQL)' },
-      { value: 'O11', label: 'OutSystems 11 (T-SQL/MSSQL)  ⚠  SQL validation uses PostgreSQL syntax locally' },
-    ],
-  });
+  // 2. Target Environment (--odc / --o11 flag or prompt)
+  let platform;
+  if (flags.odc || flags.o11) {
+    platform = flags.o11 ? 'O11' : 'ODC';
+  } else {
+    platform = await select({
+      message: 'Which OutSystems platform are you targeting?',
+      options: [
+        { value: 'ODC', label: 'OutSystems Developer Cloud (PostgreSQL)' },
+        { value: 'O11', label: 'OutSystems 11 (T-SQL/MSSQL)  ⚠  SQL validation uses PostgreSQL syntax locally' },
+      ],
+    });
 
-  if (isCancel(platform)) {
-    outro('Cancelled.');
-    process.exit(0);
+    if (isCancel(platform)) {
+      outro('Cancelled.');
+      process.exit(0);
+    }
   }
 
   if (platform === 'O11') {
@@ -60,18 +99,23 @@ async function init() {
     );
   }
 
-  // 3. App Type Selection
-  const appType = await select({
-    message: 'What type of app are you building?',
-    options: [
-      { value: 'reactive', label: 'Reactive Web App' },
-      { value: 'mobile', label: 'Mobile App' },
-    ],
-  });
+  // 3. App Type (--reactive / --mobile flag or prompt)
+  let appType;
+  if (flags.reactive || flags.mobile) {
+    appType = flags.mobile ? 'mobile' : 'reactive';
+  } else {
+    appType = await select({
+      message: 'What type of app are you building?',
+      options: [
+        { value: 'reactive', label: 'Reactive Web App' },
+        { value: 'mobile', label: 'Mobile App' },
+      ],
+    });
 
-  if (isCancel(appType)) {
-    outro('Cancelled.');
-    process.exit(0);
+    if (isCancel(appType)) {
+      outro('Cancelled.');
+      process.exit(0);
+    }
   }
 
   const s = spinner();

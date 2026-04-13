@@ -245,6 +245,46 @@ When documenting action logic as a flowchart, create a `.flowchart.md` file usin
 
 Loops and switches are represented as `{Decision}` nodes with labeled edges looping back.
 
+### Node Label Quoting Rules
+
+Wrap node labels in double quotes whenever they contain any of the following characters: `=`, `(`, `)`, `<`, `>`, `,`, `%`, `+`, `-` (inside expressions), or any special character that Mermaid may interpret as syntax.
+
+```
+// Wrong — causes parse error
+G[NewDate = AddDays(NewDate, Step)]
+H{DayOfWeek(NewDate) = 0 or DayOfWeek(NewDate) = 6?}
+
+// Correct
+G["NewDate = AddDays(NewDate, Step)"]
+H{"DayOfWeek(NewDate) = 0 or DayOfWeek(NewDate) = 6?"}
+```
+
+Plain English labels with no special characters do NOT need quotes.
+
+### File Contents and Placement
+
+A `.flowchart.md` file must contain **only** the Mermaid code block — no prose, no headings, no description text before or after.
+
+```
+// Wrong — extra markdown content
+# AddWorkingDays
+
+This action adds working days to a date, skipping weekends.
+
+\`\`\`mermaid
+flowchart TD
+    ...
+\`\`\`
+
+// Correct — pure Mermaid only
+\`\`\`mermaid
+flowchart TD
+    ...
+\`\`\`
+```
+
+Place `.flowchart.md` files in the **`logic/`** folder, named after the action (e.g., `logic/AddWorkingDays.flowchart.md`). Never place them in `database/`, `screens/`, or other folders.
+
 ### Example: Server Action flowchart
 
 ```mermaid

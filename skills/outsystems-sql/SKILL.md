@@ -1,13 +1,13 @@
 ---
 name: outsystems-sql
 description: >-
-  OutSystems SQL query authoring for both O11 (MSSQL) and ODC (PostgreSQL).
+  OutSystems SQL query authoring for both O11 (MSSQL) and ODC (Aurora PostgreSQL / ANSI-92).
   Covers entity references, aggregate syntax, advanced SQL, joins, functions,
   parameterized queries, and platform-specific syntax differences. Also handles
   converting ODC data models into Flowmo-compatible PostgreSQL schemas. Use when
   the developer is writing SQL queries, creating aggregates, working with data
   retrieval logic, or needs to mirror an ODC schema locally.
-compatibility: Designed for OutSystems Service Studio. Requires knowledge of target platform (O11 or ODC).
+compatibility: Designed for OutSystems Service Studio (O11) and ODC Studio (ODC). Requires knowledge of target platform.
 metadata:
   version: "1.0"
   source: "OutSystems documentation and SQL best practices"
@@ -20,9 +20,12 @@ metadata:
 Before writing any SQL, determine the target platform:
 
 - **O11 (OutSystems 11)** — Uses Microsoft SQL Server syntax (T-SQL)
-- **ODC (OutSystems Developer Cloud)** — Uses PostgreSQL syntax
+- **ODC (OutSystems Developer Cloud)** — SQL nodes use the same `{Entity}.[Attribute]` notation as O11. ODC Studio selects the execution mode automatically:
+  - **Internal entities only** → executes with PostgreSQL-dialect functions/clauses (`NOW()`, `LIMIT`, `||`, `RANDOM()`, etc.)
+  - **External entities (Data Fabric) or mixed** → executes via ANSI-92 normalization; same notation applies
+  - You cannot select the mode manually; the notation is identical in both cases
 
-Ask the developer which platform they are targeting if not already clear. The syntax differences are significant and mixing them will produce runtime errors.
+Ask the developer which platform they are targeting if not already clear. Despite the shared notation, function and clause differences cause runtime errors if O11 and ODC syntax is mixed.
 
 ## Entity & Attribute References
 
@@ -36,200 +39,59 @@ WHERE {Entity}.[IsActive] = 1
 - Attributes: `[AttributeName]` in square brackets
 - Boolean: `1` / `0` (stored as integer)
 
-### ODC (PostgreSQL)
+### ODC (Aurora PostgreSQL)
 ```sql
-SELECT entity."Attribute1", entity."Attribute2"
-FROM entity
-WHERE entity."IsActive" = true
+SELECT {Entity}.[Attribute1], {Entity}.[Attribute2]
+FROM {Entity}
+WHERE {Entity}.[IsActive] = 1
 ```
-- Entities: lowercase, no braces
-- Attributes: `"AttributeName"` in double quotes (case-sensitive)
-- Boolean: `true` / `false`
+- Entities: `{EntityName}` in curly braces — same notation as O11
+- Attributes: `[AttributeName]` in square brackets — same notation as O11
+- Boolean: `1` / `0` (stored as integer, same as O11)
+- `SELECT *` is **not valid** — always qualify as `SELECT {Entity}.*`
+- Functions/clauses use PostgreSQL syntax: `NOW()`, `LIMIT`, `||`, `RANDOM()`, etc.
+- For external entities (ANSI-92 mode), qualifying column lists as `{Entity}.[Attr]` is recommended
 
 ## Syntax Differences Quick Reference
 
-| Operation | O11 (MSSQL) | ODC (PostgreSQL) |
-|-----------|-------------|------------------|
+Both O11 and ODC SQL nodes use `{Entity}.[Attribute]` notation. The differences are in functions, operators, and clause syntax.
+
+| Operation | O11 (MSSQL) | ODC (ANSI-92 / Aurora PostgreSQL) |
+|-----------|-------------|-----------------------------------|
+| Entity/attribute notation | `{Entity}.[Attribute]` | `{Entity}.[Attribute]` — same |
+| Boolean values | `1` / `0` (integer) | `1` / `0` (integer — same) |
+| Select all columns | `SELECT * FROM {Entity}` | `SELECT {Entity}.* FROM {Entity}` — must qualify |
 | Current date/time | `GETDATE()` | `NOW()` |
-| Top N rows | `SELECT TOP N ...` | `SELECT ... LIMIT N` |
+| Top N rows | `SELECT TOP N * FROM {Entity}` | `SELECT {Entity}.* FROM {Entity} LIMIT N` |
+| Random rows | `ORDER BY NEWID()` | `ORDER BY RANDOM()` |
 | Null coalesce | `ISNULL(x, default)` | `COALESCE(x, default)` |
 | String concat | `'a' + 'b'` | `'a' \|\| 'b'` |
-| Boolean values | `1` / `0` (integer) | `1` / `0` (integer — stored as INTEGER, not BOOLEAN) |
-| Identity insert | `SCOPE_IDENTITY()` | `RETURNING Id` |
 | Date diff | `DATEDIFF(day, d1, d2)` | `d2 - d1` or `EXTRACT(...)` |
 | Substring | `SUBSTRING(s, start, len)` | `SUBSTRING(s FROM start FOR len)` |
 | Type cast | `CAST(x AS INT)` | `CAST(x AS INTEGER)` or `x::integer` |
 | IF/ELSE in query | `IIF(cond, t, f)` | `CASE WHEN cond THEN t ELSE f END` |
 | String length | `LEN(s)` | `LENGTH(s)` |
 | Trim | `LTRIM(RTRIM(s))` | `TRIM(s)` |
-| Regex match | `LIKE` + `PATINDEX` | `~` or `SIMILAR TO` |
+| LIKE (case-insensitive) | `{Entity}.[Name] LIKE '%val%'` | `caseaccent_normalize({Entity}.[Name] collate "default") LIKE caseaccent_normalize('%val%')` — bare LIKE fails on text columns |
 | Pagination | `OFFSET N ROWS FETCH NEXT M ROWS ONLY` | `LIMIT M OFFSET N` |
-| Auto-increment | `IDENTITY(1,1)` | `SERIAL` or `GENERATED ALWAYS AS IDENTITY` |
-| Temp tables | `#TempTable` | `CREATE TEMP TABLE` |
-| Table variable | `DECLARE @t TABLE(...)` | Not supported — use CTEs |
-| Merge/Upsert | `MERGE INTO ... USING ...` | `INSERT ... ON CONFLICT ... DO UPDATE` |
+| INSERT column list | `INSERT INTO {Entity} ({Entity}.[Attr1])` | Internal: `INSERT INTO {Entity} ([Attr1])` — no prefix. External (ANSI-92): `INSERT INTO {Entity} ({Entity}.[Attr1])` — qualify with entity prefix (recommended) |
+| UPDATE SET clause | `UPDATE {Entity} SET {Entity}.[Attr] = val` | `UPDATE {Entity} SET [Attr] = val` — no entity prefix in SET |
+| UPSERT | `MERGE INTO ... USING ...` | `UPSERT INTO {Entity} ({Entity}.[Id], {Entity}.[Attr]) VALUES (@Id, @Value)` — requires non-generated PK; never returns a result |
 
 ## Common Query Patterns
 
-### CRUD — Create
-**O11:**
-```sql
-INSERT INTO {Entity} ([Attr1], [Attr2], [CreatedDate])
-VALUES (@Param1, @Param2, GETDATE())
-```
-
-**ODC:**
-```sql
-INSERT INTO entity ("Attr1", "Attr2", "CreatedDate")
-VALUES (@Param1, @Param2, NOW())
-RETURNING "Id"
-```
-
-### CRUD — Read with Join
-**O11:**
-```sql
-SELECT {Order}.[Id], {Order}.[Total], {Customer}.[Name]
-FROM {Order}
-INNER JOIN {Customer} ON {Customer}.[Id] = {Order}.[CustomerId]
-WHERE {Order}.[Status] = @Status
-ORDER BY {Order}.[CreatedDate] DESC
-```
-
-**ODC:**
-```sql
-SELECT o."Id", o."Total", c."Name"
-FROM "order" o
-INNER JOIN customer c ON c."Id" = o."CustomerId"
-WHERE o."Status" = @Status
-ORDER BY o."CreatedDate" DESC
-```
-
-### CRUD — Update
-**O11:**
-```sql
-UPDATE {Entity}
-SET [Attr1] = @NewValue, [ModifiedDate] = GETDATE()
-WHERE [Id] = @Id
-```
-
-**ODC:**
-```sql
-UPDATE entity
-SET "Attr1" = @NewValue, "ModifiedDate" = NOW()
-WHERE "Id" = @Id
-```
-
-### CRUD — Delete (Soft)
-**O11:**
-```sql
-UPDATE {Entity}
-SET [IsActive] = 0, [DeletedDate] = GETDATE()
-WHERE [Id] = @Id
-```
-
-**ODC:**
-```sql
-UPDATE entity
-SET is_active = 0, deleted_date = NOW()
-WHERE id = @Id
-```
-
-### Aggregation with Group By
-**O11:**
-```sql
-SELECT {Category}.[Name], COUNT(*) AS Total, SUM({Product}.[Price]) AS Revenue
-FROM {Product}
-INNER JOIN {Category} ON {Category}.[Id] = {Product}.[CategoryId]
-WHERE {Product}.[IsActive] = 1
-GROUP BY {Category}.[Name]
-HAVING COUNT(*) > 5
-ORDER BY Revenue DESC
-```
-
-**ODC:**
-```sql
-SELECT c."Name", COUNT(*) AS "Total", SUM(p."Price") AS "Revenue"
-FROM product p
-INNER JOIN category c ON c."Id" = p."CategoryId"
-WHERE p."IsActive" = true
-GROUP BY c."Name"
-HAVING COUNT(*) > 5
-ORDER BY "Revenue" DESC
-```
-
-### Pagination
-**O11:**
-```sql
-SELECT {Entity}.[Id], {Entity}.[Name]
-FROM {Entity}
-ORDER BY {Entity}.[Name]
-OFFSET @StartIndex ROWS
-FETCH NEXT @MaxRecords ROWS ONLY
-```
-
-**ODC:**
-```sql
-SELECT e."Id", e."Name"
-FROM entity e
-ORDER BY e."Name"
-LIMIT @MaxRecords OFFSET @StartIndex
-```
-
-### Subquery / EXISTS
-**O11:**
-```sql
-SELECT {Customer}.[Id], {Customer}.[Name]
-FROM {Customer}
-WHERE EXISTS (
-  SELECT 1 FROM {Order}
-  WHERE {Order}.[CustomerId] = {Customer}.[Id]
-    AND {Order}.[Total] > 1000
-)
-```
-
-**ODC:**
-```sql
-SELECT c."Id", c."Name"
-FROM customer c
-WHERE EXISTS (
-  SELECT 1 FROM "order" o
-  WHERE o."CustomerId" = c."Id"
-    AND o."Total" > 1000
-)
-```
-
-### CTE (Common Table Expression)
-**O11:**
-```sql
-WITH RecentOrders AS (
-  SELECT {Order}.[CustomerId], MAX({Order}.[CreatedDate]) AS LastOrder
-  FROM {Order}
-  GROUP BY {Order}.[CustomerId]
-)
-SELECT {Customer}.[Name], ro.LastOrder
-FROM {Customer}
-INNER JOIN RecentOrders ro ON ro.[CustomerId] = {Customer}.[Id]
-```
-
-**ODC:**
-```sql
-WITH recent_orders AS (
-  SELECT o."CustomerId", MAX(o."CreatedDate") AS "LastOrder"
-  FROM "order" o
-  GROUP BY o."CustomerId"
-)
-SELECT c."Name", ro."LastOrder"
-FROM customer c
-INNER JOIN recent_orders ro ON ro."CustomerId" = c."Id"
-```
+Read `references/query-patterns.md` whenever you need example queries — CRUD (create, read, update, delete), aggregation, pagination, subqueries, and CTEs for both O11 and ODC.
 
 ## Parameters
 
 Always use parameters (`@ParamName`) for input values — NEVER concatenate user input into SQL strings. OutSystems enforces this in Advanced SQL but ensure it in any generated queries.
 
 ```sql
--- CORRECT
+-- CORRECT (O11)
 WHERE {Entity}.[Name] LIKE '%' + @SearchTerm + '%'
+
+-- CORRECT (ODC) — LIKE on text columns requires caseaccent_normalize
+WHERE caseaccent_normalize({Entity}.[Name] collate "default") LIKE caseaccent_normalize('%' || @SearchTerm || '%')
 
 -- WRONG (SQL injection risk)
 WHERE {Entity}.[Name] LIKE '%' + 'user input here' + '%'
@@ -256,8 +118,8 @@ After writing a SQL query, verify:
 1. All input values use `@ParamName` parameters — no string concatenation of user input
 2. `Max Records` is explicitly set on the Advanced SQL node (never leave it unlimited)
 3. The Output Structure is defined and its attributes match the SELECT column names
-4. Entity/attribute references use the correct syntax for the target platform (curly braces + square brackets for O11, lowercase + double quotes for ODC)
-5. Reserved words (`Order`, `User`, `Group`, `Table`) are properly quoted in ODC
+4. Entity/attribute references use `{Entity}.[Attribute]` notation for **both O11 and ODC** — ODC uses ANSI-92 syntax, not raw PostgreSQL in SQL nodes
+5. Reserved words (`Order`, `User`, `Group`, `Table`) — `{Entity}` notation handles escaping automatically in ODC SQL nodes; no manual quoting needed
 
 If any check fails, fix the query before presenting the output.
 
@@ -267,9 +129,7 @@ If any check fails, fix the query before presenting the output.
 2. **Max Records**: Always set `Max Records` on Advanced SQL queries. Default is unlimited — this can cause performance issues.
 3. **Output Structure**: Advanced SQL queries must have an Output Structure defined. The column names in SELECT must match the Output Structure attributes.
 4. **Test Queries**: O11 allows testing SQL in Service Studio. ODC requires deployment to test. Always validate syntax for the target platform.
-5. **Reserved Words**: `Order`, `User`, `Group`, `Table` are reserved in PostgreSQL. In ODC, always double-quote these entity names.
-
-   **`User` deserves special attention** — every OutSystems project has one, and forgetting to quote it causes a syntax error. The Flowmo parser handles this automatically: `{User}` → `"user"` (quoted). However, if you write raw SQL (non-`.advance.sql`), or reference a user table alias, you must quote it yourself:
+5. **Reserved Words and `{Entity}` notation**: `{Order}`, `{User}`, `{Group}` are automatically escaped by the ODC SQL node runtime — no manual quoting. However, the **Flowmo `.advance.sql` parser** translates these to raw PostgreSQL for local testing, where reserved words must be quoted. The parser handles `{User}` → `"user"` automatically. If you write raw SQL (non-`.advance.sql`), you must quote manually:
 
    ```sql
    -- .advance.sql (parser handles it automatically)
@@ -308,186 +168,27 @@ If any check fails, fix the query before presenting the output.
    );
    ```
 
-6. **Date Comparisons**: O11 uses `BETWEEN` or `DATEDIFF`. ODC prefers range comparisons with `>=` and `<` or `EXTRACT()`.
-7. **Aggregate Functions in WHERE**: Use `HAVING` for aggregate conditions — `WHERE` runs before `GROUP BY`.
-8. **Index Awareness**: Filter on indexed attributes when possible. In O11 check Query Analyzer; in ODC check the database logs.
+6. **`SELECT *` is invalid in ODC SQL nodes** — always qualify as `SELECT {Entity}.*`. Bare `SELECT *` causes a runtime error.
+7. **LIKE in ODC requires `caseaccent_normalize()`** — ODC uses non-deterministic collations for all text columns. Bare `LIKE` pattern matching on text columns fails at runtime with a collation error. Always wrap both sides:
+   ```sql
+   WHERE caseaccent_normalize({Entity}.[Name] collate "default") LIKE caseaccent_normalize('%' || @SearchTerm || '%')
+   ```
+   The `collate "default"` part is only needed when applying the pattern to a column (non-deterministic collation). You can omit it for literal-only patterns:
+   ```sql
+   WHERE caseaccent_normalize({Entity}.[Name] collate "default") LIKE caseaccent_normalize('%something%')
+   ```
+8. **Date Comparisons**: O11 uses `BETWEEN` or `DATEDIFF`. ODC prefers range comparisons with `>=` and `<` or `EXTRACT()`.
+9. **Aggregate Functions in WHERE**: Use `HAVING` for aggregate conditions — `WHERE` runs before `GROUP BY`.
+10. **Index Awareness**: Filter on indexed attributes when possible. In O11 check Query Analyzer; in ODC check the database logs.
 
 ---
 
-## ODC to Flowmo Schema (AI Bridge)
+## ODC to Flowmo Schema
 
-When a developer wants to mirror their ODC data model into a local Flowmo project, generate a PostgreSQL `CREATE TABLE` script compatible with PGLite. This is the primary way to set up `database/schema.sql` before running `flowmo db:setup`.
-
-### Conversion Rules
-
-1. Use **lowercase snake_case** for all table and column names (`IsActive` → `is_active`).
-2. Map OutSystems types to PostgreSQL types:
-
-   | OutSystems Type | PostgreSQL Type |
-   |---|---|
-   | Text | `TEXT` |
-   | Integer | `INTEGER` |
-   | Long Integer | `BIGINT` |
-   | Decimal | `NUMERIC(18, 2)` |
-   | Boolean | `INTEGER` (use `1`/`0` to match OutSystems O11 storage) |
-   | Date Time | `TIMESTAMPTZ` |
-   | Date | `DATE` |
-   | Binary Data | `BYTEA` |
-   | Email | `TEXT` |
-   | Phone Number | `TEXT` |
-   | Currency | `NUMERIC(18, 2)` |
-
-3. Every table gets `id SERIAL PRIMARY KEY` as the first column (or `BIGSERIAL` if the ODC identifier is Long Integer).
-4. OutSystems foreign key attributes (e.g., `UserId`) become `INTEGER REFERENCES parent_table(id)`.
-5. OutSystems attributes are **NOT NULL by default** — apply `NOT NULL` unless the attribute is explicitly optional.
-6. Add `DEFAULT 1` / `DEFAULT 0` for Boolean (INTEGER) attributes that have a default set.
-7. Add `DEFAULT NOW()` for Date Time attributes named `CreatedAt`, `CreatedOn`, or similar creation timestamps.
-8. Output **only raw SQL** — no markdown fences, no explanations, no `CREATE SCHEMA` statements.
-9. Precede each table with a comment: `-- Table: table_name`.
-
-### Example
-
-**Input (ODC Entity):**
-```
-Entity: User
-  - Id (Long Integer, Identifier)
-  - Name (Text, 50)
-  - Email (Text, 250)
-  - IsActive (Boolean, Default: True)
-  - CreatedAt (Date Time)
-```
-
-**Output:**
-```sql
--- Table: users
-CREATE TABLE users (
-  id         BIGSERIAL    PRIMARY KEY,
-  name       TEXT         NOT NULL,
-  email      TEXT         NOT NULL,
-  is_active  INTEGER      NOT NULL DEFAULT 1,
-  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-```
-
-### Workflow
-
-When asked to generate a Flowmo schema from an ODC data model:
-
-1. Ask the developer to describe their entities or paste the ODC diagram description. Accept screenshots too — extract entity names and attributes from them.
-2. Apply all conversion rules above.
-3. Output the raw SQL directly — it can be pasted into `database/schema.sql`.
-4. Remind them to run `flowmo db:setup` after saving.
-
-> **Tip for users without direct DB access:** Ask OutSystems Mentor AI to generate a PostgreSQL CREATE TABLE script from your data model, then paste it into `database/schema.sql` and adjust as needed using this skill.
+Read `references/odc-schema.md` when generating a local Flowmo PostgreSQL schema (`database/schema.sql`) from an ODC entity model. It covers the type mapping table, conversion rules, a full example, and the `db:setup` workflow.
 
 ---
 
 ## Testing Queries with the Flowmo CLI
 
-After writing a query, always test it locally using `flowmo db:query` before considering it done. This closes the loop between authoring and verification.
-
-### Prerequisites
-
-The local database must be provisioned and seeded first:
-
-```bash
-npx flowmo db:setup   # drop and recreate schema from database/schema.sql
-npx flowmo db:seed    # insert seed data (auto-discovers database/seeds/ or database/seeds.sql)
-```
-
-Or use `db:reset` to do both in one step:
-
-```bash
-npx flowmo db:reset --seed
-
-# With an explicit seed list:
-npx flowmo db:reset --seed database/seeds/01_users.sql database/seeds/02_products.sql
-```
-
-Only needed once per session (or after a schema change).
-
-### Running a Query
-
-**Standard SQL:**
-```bash
-npx flowmo db:query database/queries/my_query.sql
-```
-
-**OutSystems Advanced SQL** (`.advance.sql`) with parameters:
-```bash
-npx flowmo db:query database/queries/MyQuery.advance.sql '{"ParamName": "value"}'
-```
-
-All `@ParamName` references in the file are automatically detected and mapped to positional `$1`, `$2`, … bindings. Pass every parameter the query references — missing parameters will cause a binding error.
-
-**Inline SQL** (quick spot-checks, no file needed):
-```bash
-npx flowmo db:query "SELECT * FROM users"
-npx flowmo db:query "SELECT COUNT(*) FROM orders WHERE is_active = 1"
-```
-
-Inline mode is param-free. For parameterised or OutSystems Advanced SQL queries, always use a file.
-
-### Flags
-
-| Flag | Default | Description |
-|---|---|---|
-| `--limit <n>` | `10` | Maximum rows to display. Increase when you expect more results. |
-| `--simple` | off | Plain `key: value` output instead of the bordered ASCII table. Useful for wide rows or piping output. |
-
-```bash
-# Show up to 50 rows
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50
-
-# Plain output (no table borders)
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --simple
-
-# Both together
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50 --simple
-```
-
-### Parameter Types
-
-All parameter values are passed as strings in the JSON object. The database coerces them to the correct type:
-
-```bash
-# Integers
-npx flowmo db:query ... '{"UserId": "1", "MaxRecords": "10"}'
-
-# Booleans (stored as INTEGER — pass "1" or "0")
-npx flowmo db:query ... '{"IsActive": "1", "CanViewPrice": "0"}'
-
-# Empty string (for optional text filters)
-npx flowmo db:query ... '{"SearchTerm": ""}'
-
-# "No filter" sentinel for IN-clause parameters (pass "0" to bypass)
-npx flowmo db:query ... '{"ProjectIds": "0", "RoleIds": "0"}'
-```
-
-### Reading the Output
-
-Results are printed as an ASCII table with one `Row N` block per record:
-
-```
--[ Row 1 ]-----
-┌──────────────┬─────────────────┐
-│ filter_value │ 1               │
-│ display_name │ Acme (PROT-001) │
-└──────────────┴─────────────────┘
-(1 row)
-```
-
-- `(0 rows)` — query ran successfully but returned no data. Check your seed data and filter parameters.
-- A binding error means a `@ParamName` in the file was not supplied in the JSON — add it.
-- A syntax error means the SQL itself is invalid — re-check entity/attribute references and platform syntax.
-
-### Workflow Checklist
-
-When authoring or modifying a query as an agent:
-
-1. Write or update the `.sql` / `.advance.sql` file.
-2. Identify every `@ParamName` in the file.
-3. Run `npx flowmo db:query <file> '<params-json>'` with all parameters supplied.
-4. Confirm the output matches the expected shape (correct columns, at least 1 row if seed data covers it).
-5. If 0 rows: verify seed data contains matching records, or relax filter parameters (use `"0"` for ID filters, `""` for text filters).
-6. Only mark the query ready once it returns the expected result.
+Read `references/flowmo-cli.md` when running or testing queries locally with the Flowmo CLI. It covers `db:setup`/`db:seed`/`db:reset`, `db:query` usage, flags, parameter types, and a workflow checklist.

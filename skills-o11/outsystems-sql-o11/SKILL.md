@@ -17,6 +17,8 @@ metadata:
 > Always follow `outsystems-sql` for entity reference syntax, type mapping, and
 > platform-specific rules. This skill defines the **dual-file authoring process**
 > for testing T-SQL logic locally before deploying to OutSystems 11.
+>
+> The `_postgres.advance.sql` files created by this workflow use **raw PostgreSQL syntax** (lowercase table/column names, no `{Entity}` notation). This is intentional — they are local test artefacts for PGLite only, not OutSystems queries. An agent reading both skills simultaneously should never apply the raw PostgreSQL style to OutSystems query files.
 
 ## Why Two Files?
 

@@ -142,13 +142,19 @@ async function init() {
       await fs.copy(o11Skills, path.join(projectPath, '.agents/skills'));
     }
 
-    // Copy starter template files (CSS, starter screen, data, logic)
+    // Copy starter template files (CSS, starter screen, data, logic, components)
     const templateDir = path.join(__dirname, 'template');
     await fs.copy(path.join(templateDir, 'theme'), path.join(projectPath, 'theme'));
     await fs.copy(path.join(templateDir, 'scripts'), path.join(projectPath, 'scripts'));
     await fs.copy(path.join(templateDir, 'screens'), path.join(projectPath, 'screens'));
     await fs.copy(path.join(templateDir, 'database'), path.join(projectPath, 'database'));
     await fs.copy(path.join(templateDir, 'logic'), path.join(projectPath, 'logic'));
+    await fs.copy(path.join(templateDir, 'components'), path.join(projectPath, 'components'));
+
+    // Copy AGENTS.md to project root for AI agent discovery
+    if (fs.existsSync(path.join(templateDir, 'AGENTS.md'))) {
+      await fs.copy(path.join(templateDir, 'AGENTS.md'), path.join(projectPath, 'AGENTS.md'));
+    }
 
     // Generate package.json for the scaffolded project
     const pkg = buildPackageJson(projectName, platform, appType);

@@ -1,12 +1,14 @@
 ---
 name: outsystems-sql
 description: >-
-  OutSystems SQL query authoring for both O11 (MSSQL) and ODC (Aurora PostgreSQL / ANSI-92).
-  Covers entity references, aggregate syntax, advanced SQL, joins, functions,
-  parameterized queries, and platform-specific syntax differences. Also handles
-  converting ODC data models into Flowmo-compatible PostgreSQL schemas. Use when
-  the developer is writing SQL queries, creating aggregates, working with data
-  retrieval logic, or needs to mirror an ODC schema locally.
+  OutSystems SQL query authoring and flowmo database tooling for both O11 (MSSQL)
+  and ODC (Aurora PostgreSQL / ANSI-92). Covers entity references, aggregate syntax,
+  advanced SQL, joins, functions, parameterized queries, platform-specific syntax
+  differences, running and testing queries with flowmo db:query, setting up seed data,
+  and the full write-test-iterate workflow. Also handles converting ODC data models
+  into Flowmo-compatible PostgreSQL schemas. Use when writing or testing .advance.sql
+  files, working with aggregates, running queries, seeding data, or mirroring an ODC
+  schema locally.
 compatibility: Designed for OutSystems Service Studio (O11) and ODC Studio (ODC). Requires knowledge of target platform.
 metadata:
   version: "1.0"

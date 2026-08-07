@@ -6,9 +6,8 @@ description: >
   styling components, using layout patterns (Cards, Columns, Forms, Tables, Tabs),
   applying spacing, colors, typography, or scaffolding screens — even if the user
   doesn't mention "OutSystems" explicitly. Covers all 86 UI patterns across 8
-  categories, 16 core widgets, the complete design token system, the full screen
-  workflow (generate → self-check → dev server with npm run dev → visual verification),
-  and layout components.
+  categories, 16 core widgets, the full screen workflow (generate → self-check →
+  dev server with npm run dev → visual verification), layout components, and
   the complete design token system (spacing, colors, borders, shadows, typography).
 compatibility: Requires outsystems-ui.css linked in the HTML file. Designed for VS Code agents.
 metadata:

@@ -16,9 +16,6 @@ This is a **flowmo** project — an OutSystems prototyping environment with a lo
 | Standard | When to read |
 |---|---|
 | `docs/flowmo-query-testing-standard.md` | Before writing or testing any SQL query |
-| `docs/flowmo-screen-structure.md` | Before creating a new screen |
-| `docs/flowmo-component-architecture.md` | Before creating a reusable component |
-| `docs/flowmo-schema-migrations.md` | Before modifying the database schema |
 
 ## Rules
 
@@ -33,7 +30,7 @@ This is a **flowmo** project — an OutSystems prototyping environment with a lo
 
 4. **Follow the screen folder convention**: `screens/{ticket}-{name}/index.visual.html`
 
-5. **Queries are tested via vitest** — follow the pattern in `docs/flowmo-query-testing-standard.md`.
+5. **Queries are tested via vitest** — each query file should have a matching test in `tests/`. Follow the pattern in `docs/flowmo-query-testing-standard.md`.
 
 ## Project structure
 

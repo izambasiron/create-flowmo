@@ -35,7 +35,9 @@ npx create-flowmo my-project --mobile  # prompts for platform only
 The CLI then scaffolds a project with:
 
 - `screens/` — `.visual.html` starter screen with OutSystems UI layout
-- `database/` — `schema.sql`, `seeds.sql`, and a `queries/` folder for `.sql` and `.advance.sql` files
+- `database/` — `schema.sql`, `seeds.sql`, and a `sql/` folder for `.sql` and `.advance.sql` files
+- `tests/` — vitest query tests, including a reference test showing the canonical `--json` pattern
+- `docs/` — flowmo standards (query testing) referenced from `AGENTS.md`
 - `logic/` — Universal logic flowcharts (Client, Server, Service, or Data Actions)
 - `scripts/` — Custom scripts
 - `theme/` — OutSystems UI CSS and custom theme

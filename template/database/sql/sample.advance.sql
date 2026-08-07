@@ -2,10 +2,10 @@
 -- sample.advance.sql — OutSystems Advanced SQL query example
 -- ============================================================
 -- Use {Entity}.[Attribute] syntax just like ODC Service Studio.
--- Use @ParamName for input parameters.
+-- Input parameters are @-prefixed (like @UserId below).
 --
 -- Run with:
---   flowmo db:query database/queries/sample.advance.sql '{"UserId": "user-001"}'
+--   flowmo db:query database/sql/sample.advance.sql --param UserId=user-001
 -- ============================================================
 
 SELECT

@@ -26,12 +26,12 @@ Only needed once per session (or after a schema change).
 
 **Standard SQL:**
 ```bash
-npx flowmo db:query database/queries/my_query.sql
+npx flowmo db:query database/sql/my_query.sql
 ```
 
 **OutSystems Advanced SQL** (`.advance.sql`) with parameters:
 ```bash
-npx flowmo db:query database/queries/MyQuery.advance.sql '{"ParamName": "value"}'
+npx flowmo db:query database/sql/MyQuery.advance.sql '{"ParamName": "value"}'
 ```
 
 All `@ParamName` references in the file are automatically detected and mapped to positional `$1`, `$2`, … bindings. Pass every parameter the query references — missing parameters will cause a binding error.
@@ -53,13 +53,13 @@ Inline mode is param-free. For parameterised or OutSystems Advanced SQL queries,
 
 ```bash
 # Show up to 50 rows
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50
+npx flowmo db:query database/sql/GetAll.advance.sql '{"Active": "1"}' --limit 50
 
 # Plain output (no table borders)
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --simple
+npx flowmo db:query database/sql/GetAll.advance.sql '{"Active": "1"}' --simple
 
 # Both together
-npx flowmo db:query database/queries/GetAll.advance.sql '{"Active": "1"}' --limit 50 --simple
+npx flowmo db:query database/sql/GetAll.advance.sql '{"Active": "1"}' --limit 50 --simple
 ```
 
 ## Parameter Types

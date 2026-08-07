@@ -98,6 +98,8 @@ describe('buildPackageJson', () => {
     expect(pkg.scripts['dev:agent']).toBe('vite');
     expect(pkg.scripts.build).toBe('vite build');
     expect(pkg.scripts.preview).toBe('vite preview');
+    expect(pkg.scripts.test).toBe('vitest run');
+    expect(pkg.scripts['test:watch']).toBe('vitest');
   });
 
   it('lists flowmo as a runtime dependency', () => {
@@ -108,6 +110,11 @@ describe('buildPackageJson', () => {
   it('lists vite as a dev dependency', () => {
     const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.devDependencies.vite).toMatch(/^\^6/);
+  });
+
+  it('lists vitest as a dev dependency', () => {
+    const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
+    expect(pkg.devDependencies.vitest).toMatch(/^\^4/);
   });
 
   it('produces independent objects for different project names', () => {

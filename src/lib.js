@@ -49,12 +49,15 @@ export function buildPackageJson(projectName, platform, appType) {
       'dev:agent': 'vite',
       build: 'vite build',
       preview: 'vite preview',
+      test: 'vitest run',
+      'test:watch': 'vitest',
     },
     dependencies: {
       flowmo: 'latest',
     },
     devDependencies: {
       vite: '^6.0.0',
+      vitest: '^4.0.0',
     },
   };
 }

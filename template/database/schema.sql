@@ -5,18 +5,17 @@
 -- Run `flowmo db:setup` to drop and recreate all tables.
 --
 -- Tip: Use Mentor AI or an external vision model to generate
--- this from your ODC data model. See /prompts/odc-to-schema.txt.
+-- this from your ODC data model. See the `outsystems-sql` skill
+-- (ODC to Flowmo Schema / AI Bridge section).
 -- ============================================================
 
--- Example:
 -- Note: 'user' is a reserved word in PostgreSQL — it must always be quoted.
 -- OutSystems User entity has: Id (GUID), Name, Email, PhotoUrl, Username.
---
--- CREATE TABLE "user" (
---   id         TEXT PRIMARY KEY,
---   name       TEXT NOT NULL,
---   email      TEXT NOT NULL,
---   photo_url  TEXT,
---   username   TEXT NOT NULL,
---   is_active  INTEGER NOT NULL DEFAULT 1
--- );
+CREATE TABLE "user" (
+  id         TEXT PRIMARY KEY,
+  name       TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  photo_url  TEXT,
+  username   TEXT NOT NULL,
+  is_active  INTEGER NOT NULL DEFAULT 1
+);

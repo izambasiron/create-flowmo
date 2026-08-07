@@ -126,7 +126,7 @@ async function init() {
   try {
     // Scaffold basic structure
     await fs.ensureDir(path.join(projectPath, '.agents'));
-    await fs.ensureDir(path.join(projectPath, 'database/queries'));
+    await fs.ensureDir(path.join(projectPath, 'database/sql'));
     await fs.ensureDir(path.join(projectPath, 'logic'));
     await fs.ensureDir(path.join(projectPath, 'screens'));
     await fs.ensureDir(path.join(projectPath, 'scripts'));
@@ -150,6 +150,8 @@ async function init() {
     await fs.copy(path.join(templateDir, 'database'), path.join(projectPath, 'database'));
     await fs.copy(path.join(templateDir, 'logic'), path.join(projectPath, 'logic'));
     await fs.copy(path.join(templateDir, 'components'), path.join(projectPath, 'components'));
+    await fs.copy(path.join(templateDir, 'tests'), path.join(projectPath, 'tests'));
+    await fs.copy(path.join(templateDir, 'docs'), path.join(projectPath, 'docs'));
 
     // Copy AGENTS.md to project root for AI agent discovery
     if (fs.existsSync(path.join(templateDir, 'AGENTS.md'))) {

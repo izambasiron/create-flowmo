@@ -30,7 +30,7 @@ first writing a PostgreSQL equivalent. The workflow below bridges this gap.
 
 ## File Naming Convention
 
-For every query, always create exactly **two files** in `database/queries/`:
+For every query, always create exactly **two files** in `database/sql/`:
 
 | File | Syntax | Purpose |
 |---|---|---|
@@ -48,7 +48,7 @@ Follow these steps **in order** for every new query:
 
 ### Step 1 — Write the PostgreSQL version first
 
-Create `database/queries/MyQuery_postgres.advance.sql` using PostgreSQL syntax.
+Create `database/sql/MyQuery_postgres.advance.sql` using PostgreSQL syntax.
 Use lowercase table and column names that match your `database/schema.sql`.
 
 ```sql
@@ -82,7 +82,7 @@ Rules for the PostgreSQL version:
 Run the query against the local PGLite database:
 
 ```bash
-npx flowmo db:query database/queries/MyQuery_postgres.advance.sql '{"Status": "Active", "MaxRecords": 10}'
+npx flowmo db:query database/sql/MyQuery_postgres.advance.sql '{"Status": "Active", "MaxRecords": 10}'
 ```
 
 Iterate on `MyQuery_postgres.advance.sql` until the query:
@@ -94,7 +94,7 @@ Iterate on `MyQuery_postgres.advance.sql` until the query:
 
 ### Step 3 — Write the T-SQL version
 
-Only after the PostgreSQL version is validated, create `database/queries/MyQuery.advance.sql`
+Only after the PostgreSQL version is validated, create `database/sql/MyQuery.advance.sql`
 using T-SQL syntax for OutSystems 11 Service Studio.
 
 Translate using these rules:
@@ -149,7 +149,7 @@ Before presenting the T-SQL file, verify:
 
 **Scenario**: Get a user's recent active orders, capped at N results.
 
-**`database/queries/GetUserOrders_postgres.advance.sql`**
+**`database/sql/GetUserOrders_postgres.advance.sql`**
 ```sql
 SELECT
   o.id,
@@ -167,10 +167,10 @@ LIMIT @MaxRecords
 
 Validate:
 ```bash
-npx flowmo db:query database/queries/GetUserOrders_postgres.advance.sql '{"UserId": "user-001", "MaxRecords": 5}'
+npx flowmo db:query database/sql/GetUserOrders_postgres.advance.sql '{"UserId": "user-001", "MaxRecords": 5}'
 ```
 
-**`database/queries/GetUserOrders.advance.sql`** (written only after validation passes)
+**`database/sql/GetUserOrders.advance.sql`** (written only after validation passes)
 ```sql
 SELECT
   {Order}.[Id],
@@ -199,7 +199,7 @@ When modifying an existing query:
 ## Summary
 
 ```
-database/queries/
+database/sql/
   MyQuery_postgres.advance.sql   ← write first, validate locally
   MyQuery.advance.sql            ← write after validation, paste into O11
 ```

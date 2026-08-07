@@ -16,7 +16,7 @@ async function scaffold(projectName, platform = 'ODC') {
   const projectPath = path.join(TMP_DIR, projectName);
 
   await fs.ensureDir(path.join(projectPath, '.agents'));
-  await fs.ensureDir(path.join(projectPath, 'database/queries'));
+  await fs.ensureDir(path.join(projectPath, 'database/sql'));
   await fs.ensureDir(path.join(projectPath, 'logic'));
   await fs.ensureDir(path.join(projectPath, 'screens'));
   await fs.ensureDir(path.join(projectPath, 'scripts'));
@@ -35,6 +35,8 @@ async function scaffold(projectName, platform = 'ODC') {
   await fs.copy(path.join(TEMPLATE_DIR, 'screens'), path.join(projectPath, 'screens'));
   await fs.copy(path.join(TEMPLATE_DIR, 'database'), path.join(projectPath, 'database'));
   await fs.copy(path.join(TEMPLATE_DIR, 'logic'), path.join(projectPath, 'logic'));
+  await fs.copy(path.join(TEMPLATE_DIR, 'tests'), path.join(projectPath, 'tests'));
+  await fs.copy(path.join(TEMPLATE_DIR, 'docs'), path.join(projectPath, 'docs'));
 
   const pkg = buildPackageJson(projectName, 'ODC', 'reactive');
   await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
@@ -129,6 +131,15 @@ describe('scaffold integration', () => {
   it('copies the starter database files', async () => {
     expect(await fs.pathExists(path.join(projectPath, 'database/schema.sql'))).toBe(true);
     expect(await fs.pathExists(path.join(projectPath, 'database/seeds.sql'))).toBe(true);
+  });
+
+  it('scaffolds queries under database/sql/', async () => {
+    expect(await fs.pathExists(path.join(projectPath, 'database/sql/sample.advance.sql'))).toBe(true);
+  });
+
+  it('copies the reference query test and testing standard', async () => {
+    expect(await fs.pathExists(path.join(projectPath, 'tests/example-query.test.js'))).toBe(true);
+    expect(await fs.pathExists(path.join(projectPath, 'docs/flowmo-query-testing-standard.md'))).toBe(true);
   });
 
   it('copies the starter logic files', async () => {

@@ -437,7 +437,7 @@ OSUI does not ship a user-facing icon font. Since v2.28 the framework internally
 
 Alternatively, use inline SVGs with the `.icon` class if you want to avoid external dependencies.
 
-**Placeholder class caveat (v2.28):** the empty-placeholder class `.ph` was renamed `.placeholder-empty`. The project theme is still v2.27.0, which uses `.ph` (`.ph:empty { display: none }`). Keep using `.ph` against the current CSS; switch to `.placeholder-empty` only if the theme is bumped to 2.28+.
+**Placeholder class caveat (v2.28):** the empty-placeholder class `.ph` was renamed `.placeholder-empty`. The project theme is now **2.28.1 (ODC build)** — the ODC build defines `.placeholder-empty:empty { display: none }` and has no `.ph` rules (the O11 build keeps both). For new markup use `.placeholder-empty`; legacy `.ph` divs in exported screens render as unstyled empty divs and are harmless.
 
 ### Dark section styling
 

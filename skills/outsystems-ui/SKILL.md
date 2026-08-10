@@ -11,8 +11,8 @@ description: >
   the complete design token system (spacing, colors, borders, shadows, typography).
 compatibility: Requires outsystems-ui.css linked in the HTML file. Designed for VS Code agents.
 metadata:
-  version: "1.1"
-  synced: "OSUI v2.27/v2.28 — 90 patterns, granular color tokens, icon-library note"
+  version: "1.2"
+  synced: "OSUI v2.29.0 — mobile menu .is--open mechanism, 90 patterns, granular color tokens"
   source: "OutSystems UI Cheat Sheet"
 ---
 
@@ -149,12 +149,14 @@ The layouts are **automatically responsive** via the OSUI CSS — no custom medi
 | Tablet | `tablet` | Burger icon appears, menu slides in from left |
 | Phone | `phone portrait` | Burger icon appears, menu slides in from left |
 
-How it works:
+How it works (v2.29.0+):
 1. `.menu-icon` (burger) is `display: none` on desktop, `display: flex` on tablet/phone
-2. Clicking burger adds `.menu-visible` to the layout wrapper
-3. `.app-menu-content` slides in: `position: fixed; left: -300px` → `translateX(300px)`
+2. Clicking the burger toggles `.is--open` on the `.app-menu-content` element itself
+3. `.app-menu-content` is positioned off-canvas (`left: calc(-1 * var(--side-menu-size))`, `--side-menu-size: 300px`) and slides in via `transform: translateX(var(--side-menu-size))` with `transition: 330ms ease-out`
 4. `.app-menu-overlay` goes from `opacity: 0` to `opacity: 1` with `pointer-events: auto`
 5. Menu links switch from `flex-direction: row` (desktop) to `flex-direction: column` (mobile)
+
+**Version note:** in v2.28.1 and earlier the burger added `.menu-visible` to the layout wrapper (`.menu-visible .app-menu-content { translateX }`). That rule was removed in v2.29.0 — open the menu with `.app-menu-content.is--open`. `.menu-visible` on `.layout` still exists but only for the **desktop** aside-expandable sidebar (`.desktop .aside-expandable.menu-visible .app-menu-content { display: flex }`). Static prototypes don't need either class — both menu states are driven by platform JS at runtime.
 
 ## Buttons
 
@@ -437,7 +439,7 @@ OSUI does not ship a user-facing icon font. Since v2.28 the framework internally
 
 Alternatively, use inline SVGs with the `.icon` class if you want to avoid external dependencies.
 
-**Placeholder class caveat (v2.28):** the empty-placeholder class `.ph` was renamed `.placeholder-empty`. The project theme is now **2.28.1 (ODC build)** — the ODC build defines `.placeholder-empty:empty { display: none }` and has no `.ph` rules (the O11 build keeps both). For new markup use `.placeholder-empty`; legacy `.ph` divs in exported screens render as unstyled empty divs and are harmless.
+**Placeholder class caveat (v2.28+):** the empty-placeholder class `.ph` was renamed `.placeholder-empty`. The project theme is now **2.29.0 (ODC build)** — the ODC build defines `.placeholder-empty:empty { display: none }` and has no `.ph` rules (the O11 build keeps both). For new markup use `.placeholder-empty`; legacy `.ph` divs in exported screens render as unstyled empty divs and are harmless.
 
 ### Dark section styling
 

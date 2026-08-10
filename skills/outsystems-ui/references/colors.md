@@ -234,3 +234,28 @@ These variables are defined at the `:root` level of the OSUI theme:
 --color-focus-outer: #FFD337;
 --color-focus-inner: var(--color-neutral-10);
 ```
+
+## Granular Color Variables (v2.27+)
+
+Since v2.27.0 OSUI also exposes granular tokens for background, text, and border colors. Every color utility resolves through the granular variable first, falling back to the legacy `--color-*` token:
+
+```css
+.background-neutral-0 { background-color: var(--background-color-neutral-0, var(--color-neutral-0)); }
+.text-neutral-0       { color: var(--text-color-neutral-0, var(--color-neutral-0)); }
+```
+
+Override either level in `theme.css`:
+
+```css
+:root {
+  /* Legacy — works everywhere, including v2.26 and earlier */
+  --color-primary: #1a56db;
+
+  /* Granular (v2.27+) — finer control, e.g. a border that differs from the text color */
+  --background-color-primary: #1a56db;
+  --text-color-primary: #1a56db;
+  --border-color-primary: #1a56db;
+}
+```
+
+Naming: `--background-color-{name}`, `--text-color-{name}`, `--border-color-{name}` for every brand, neutral, palette, and semantic color (e.g. `--background-color-neutral-0`, `--text-color-error`, `--border-color-info`).

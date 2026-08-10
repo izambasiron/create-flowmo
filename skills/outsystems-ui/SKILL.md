@@ -5,13 +5,14 @@ description: >
   CSS classes. Use when creating .visual.html prototypes, building UI screens,
   styling components, using layout patterns (Cards, Columns, Forms, Tables, Tabs),
   applying spacing, colors, typography, or scaffolding screens — even if the user
-  doesn't mention "OutSystems" explicitly. Covers all 86 UI patterns across 8
+  doesn't mention "OutSystems" explicitly. Covers all 90 UI patterns across 8
   categories, 16 core widgets, the full screen workflow (generate → self-check →
   dev server with npm run dev → visual verification), layout components, and
   the complete design token system (spacing, colors, borders, shadows, typography).
 compatibility: Requires outsystems-ui.css linked in the HTML file. Designed for VS Code agents.
 metadata:
-  version: "1.0"
+  version: "1.1"
+  synced: "OSUI v2.27/v2.28 — 90 patterns, granular color tokens, icon-library note"
   source: "OutSystems UI Cheat Sheet"
 ---
 
@@ -255,13 +256,13 @@ Most-used palette entries. Load [references/colors.md](references/colors.md) for
 
 ## UI Pattern Categories
 
-OutSystems UI includes 86 patterns across 8 categories plus 16 core widgets. All verified HTML structures are in **[references/ui-patterns.md](references/ui-patterns.md)** — load it when building any UI pattern.
+OutSystems UI includes 90 patterns across 8 categories plus 16 core widgets (verified against the live Style Guide, 2026-08). All verified HTML structures are in **[references/ui-patterns.md](references/ui-patterns.md)** — load it when building any UI pattern.
 
 | Category | Count | Key patterns |
 |----------|-------|-------------|
 | Adaptive | 12 | Columns 2–6, Columns Medium/Small Left/Right, Gallery, Master Detail, Display On Device |
 | Content | 16 | Card, Card Background, Card Item, Card Sectioned, Accordion, Alert, Tag, Section, Tooltip, User Avatar, Chat Message, Flip Content, Floating Content, List Item Content, Blank Slate, Section Group |
-| Interaction | 18 | Animated Label, Carousel, Date Picker, Dropdown Search, Dropdown Tags, Floating Actions, Input With Icon, Lightbox Image, Notification, Range Slider, Search, Sidebar, Stacked Cards, Video, Action Sheet, Animate, Scrollable Area, Range Slider Interval |
+| Interaction | 21 | Animated Label, Carousel, Date Picker, Date Picker Range, Dropdown Search, Dropdown Tags, Floating Actions, Input With Icon, Lightbox Image, Month Picker, Notification, Range Slider, Range Slider Interval, Scrollable Area, Search, Sidebar, Stacked Cards, Time Picker, Video, Action Sheet, Animate |
 | Navigation | 9 | Breadcrumbs, Tabs, Pagination, Wizard, Timeline Item, Bottom Bar Item, Section Index, Submenu, Overflow Menu |
 | Numbers | 6 | Badge, Counter, Icon Badge, Progress Bar, Progress Circle, Rating |
 | Utilities | 9 | Align Center, Button Loading, Center Content, Inline SVG, Margin Container, Separator, Mouse Events, Swipe Events, Touch Events |
@@ -428,13 +429,15 @@ These OSUI classes set background/color with high specificity that utility class
 
 ### Icons
 
-OSUI does not bundle an icon font. If your screen uses Font Awesome icons (`<i class="fa fa-*">`), you MUST add the CDN link in `<head>`:
+OSUI does not ship a user-facing icon font. Since v2.28 the framework internally uses FontAwesome-based glyphs for pattern chrome only (accordion carets, search magnifier, submenu arrows) — not for your content. If your screen uses Font Awesome icons (`<i class="fa fa-*">`), you MUST add the CDN link in `<head>`:
 
 ```html
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 ```
 
 Alternatively, use inline SVGs with the `.icon` class if you want to avoid external dependencies.
+
+**Placeholder class caveat (v2.28):** the empty-placeholder class `.ph` was renamed `.placeholder-empty`. The project theme is still v2.27.0, which uses `.ph` (`.ph:empty { display: none }`). Keep using `.ph` against the current CSS; switch to `.placeholder-empty` only if the theme is bumped to 2.28+.
 
 ### Dark section styling
 

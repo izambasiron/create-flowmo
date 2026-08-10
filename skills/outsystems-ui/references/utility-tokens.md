@@ -43,6 +43,7 @@ Append direction to the class for single-side or axis spacing:
 | Base (body) | 16px | `.font-size-base` | `--font-size-base` |
 | S (body small) | 14px | `.font-size-s` | `--font-size-s` |
 | XS (body extra small) | 12px | `.font-size-xs` | `--font-size-xs` |
+| Label | 11px | `.font-size-label` | `--font-size-label` |
 
 ### Font Weights
 
@@ -108,6 +109,7 @@ Some patterns expose CSS custom properties for fine-tuning. Set these on the pat
 | Carousel | `--{element-id}-width` |
 | Floating Actions | `--delay` |
 | Master Detail | `--master-detail-height`, `--left-percentage: 50` |
+| Progress Bar | `--progress-initial-speed`, `--progress-speed` |
 | Gallery | `--grid-desktop: 4`, `--grid-tablet: 2`, `--grid-phone: 1`, `--grid-gap: var(--space-base)` |
 | Rating | `--rating-size: 16px` |
 | Scrollable Area | `--scrollable-area-width`, `--scrollable-area-height` |

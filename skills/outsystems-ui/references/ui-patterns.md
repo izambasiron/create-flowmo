@@ -492,6 +492,41 @@ Image carousel (uses Splide library).
 </div>
 ```
 
+### Date Picker Range
+
+Range variant of the Date Picker (flatpickr `range` mode). Same `.osui-datepicker` wrapper with two inputs:
+
+```html
+<div class="osui-datepicker">
+  <span class="input-text">
+    <input class="form-control flatpickr-input" type="text" placeholder="Start date">
+  </span>
+  <span class="input-text">
+    <input class="form-control flatpickr-input" type="text" placeholder="End date">
+  </span>
+</div>
+```
+
+### Month Picker
+
+```html
+<div class="osui-monthpicker">
+  <span class="input-text">
+    <input class="form-control flatpickr-input" type="text">
+  </span>
+</div>
+```
+
+### Time Picker
+
+```html
+<div class="osui-timepicker">
+  <span class="input-text">
+    <input class="form-control flatpickr-input" type="time">
+  </span>
+</div>
+```
+
 ### Dropdown Search
 
 Searchable dropdown (uses VirtualSelect library).
@@ -1066,6 +1101,36 @@ Adds horizontal margins to constrain content width.
 ```
 
 Vertical: `separator-vertical`.
+
+### Mouse Events
+
+JavaScript-driven hover-tracking pattern — attaches `mouseenter`/`mouseleave` listeners and fires platform callbacks (OnMouseEnter/OnMouseLeave). **No visual markup of its own**; wrap any content in a plain container. Cannot be replicated in static prototypes:
+
+```html
+<div>
+  <!-- content whose hover is tracked by the platform JS -->
+</div>
+```
+
+### Swipe Events
+
+JavaScript-driven gesture pattern — listens for `touchstart`/`touchmove` and fires OnSwipeLeft/Right/Up/Down callbacks. **No visual markup**; wrap content in a plain container. Not reproducible in static prototypes:
+
+```html
+<div>
+  <!-- content that responds to swipe gestures in the platform -->
+</div>
+```
+
+### Touch Events
+
+JavaScript-driven pattern — tracks `touchstart`/`touchmove`/`touchend` on an element and fires start/move/end callbacks. **No visual markup**; wrap content in a plain container. Not reproducible in static prototypes:
+
+```html
+<div>
+  <!-- content that responds to touch events in the platform -->
+</div>
+```
 
 ---
 

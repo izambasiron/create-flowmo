@@ -189,7 +189,7 @@ If any check fails, fix the query before presenting the output.
 
 Read `references/odc-schema.md` when generating a local Flowmo PostgreSQL schema (`database/schema.sql`) from an ODC entity model. It covers the type mapping table, conversion rules, a full example, and the `db:setup` workflow.
 
-If you have a live OutSystems MCP connection this session (check for `mcp__outsystems__*` tools in your own tool list, or ask the user to run `/mcp`), read `references/mcp-schema-sync.md` instead for a fully automated version of this loop — it also covers pushing validated local work back to OutSystems and verifying it landed, not just pulling the schema.
+If you have a live OutSystems MCP connection this session (check for OutSystems MCP tools in your own tool list — named `mcp__outsystems__*` or `outsystems_*` depending on your harness — or ask the user to run `/mcp`), read `references/mcp-schema-sync.md` instead for a fully automated version of this loop — it also covers pushing validated local work back to OutSystems and verifying it landed, not just pulling the schema.
 
 ---
 

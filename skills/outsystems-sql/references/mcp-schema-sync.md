@@ -5,9 +5,10 @@ when the AI assistant has a live connection to the OutSystems MCP server.
 
 **The OutSystems MCP is early access — not GA, not every ODC tenant has it,
 and access can change over time.** Before using anything in this file, check
-whether it's actually available *this session*: look for tools named
-`mcp__outsystems__*` in your own tool list, or ask the user to run `/mcp`
-and confirm an `outsystems` server is connected. If it's not there, use
+whether it's actually available *this session*: look for OutSystems MCP tools
+in your own tool list (named `mcp__outsystems__*` or `outsystems_*` depending
+on your harness), or ask the user to run `/mcp` and confirm an `outsystems`
+server is connected. If it's not there, use
 `odc-schema.md`'s workflow instead — don't assume, and don't block on
 getting MCP access; it's a parallel path, not a requirement.
 
@@ -19,7 +20,7 @@ in one call (entities from other apps/libraries an owned entity references),
 not just the app's own entities:
 
 ```
-context_entities --app "<App Name>" --owned-only false
+context_entities(app: "<App Name>", owned_only: false)
 ```
 
 If the response is `truncated: true`, page through it (`offset`/`limit`)
@@ -37,7 +38,7 @@ This writes `database/schema.os.sql` — never touches `schema.local.sql` or
 `schema.sql`. It reports which tables are the app's own vs. pulled in purely
 for foreign-key integrity, and warns (doesn't silently drop) about any FK
 whose target wasn't in the entities you gave it — that means fetch that
-target's app too, or double check `--owned-only false` was actually passed.
+target's app too, or double check `owned_only: false` was actually passed.
 
 ## 2. Iterate locally
 
@@ -45,7 +46,10 @@ Same as the manual workflow: extend `database/schema.local.sql` (never
 `schema.os.sql` — that's the pulled mirror of what's live in OutSystems
 today), generate seed data, and validate with `npx flowmo db:setup`,
 `db:seed`, and `db:query` against `.advance.sql` files — see
-`references/flowmo-cli.md`.
+`references/flowmo-cli.md`. When writing new tables or columns by hand,
+use the ODC→PostgreSQL type mapping in `references/odc-schema.md`:
+`schema:pull` generates `schema.os.sql` for you, but `schema.local.sql`
+is authored manually.
 
 ## 3. Push validated work back
 
@@ -74,7 +78,7 @@ Follow the platform's own operating rules while doing this:
 ## 4. Confirm it actually landed
 
 Don't trust Mentor's own success signal alone. After a publish reports
-success, re-pull `context_entities` (same `--owned-only false` pattern as
+success, re-pull `context_entities` (same `owned_only: false` pattern as
 step 1) and check the fresh result against your local delta:
 
 ```bash

@@ -82,9 +82,12 @@ npx flowmo schema:verify fresh-entities.json
 ```
 
 This reports each `schema.local.sql` table as `confirmed`, `missing`, or
-`attribute mismatch`. Once everything is `confirmed`, re-run
-`flowmo schema:pull` with the fresh entities to fold them into
-`schema.os.sql` — `schema:verify` won't do that for you automatically.
+`attribute mismatch`. It's one-directional — it confirms your local delta
+landed remotely, not whether OutSystems has extra columns you didn't ask
+for. Once everything is `confirmed`, re-run `flowmo schema:pull` with the
+fresh entities to fold them into `schema.os.sql` — `schema:verify` won't do
+that for you automatically. A non-zero exit code means something isn't
+`confirmed` yet — check before assuming the loop is done.
 
 ## Known MCP limitations relevant to this loop
 

@@ -26,6 +26,14 @@ Keep these separate — they share an underlying AI but have different inputs an
 
 **Check availability before assuming the tool exists**: look for `mcp__outsystems__*` tools in your own tool list, or ask the user to run `/mcp` and confirm an `outsystems` server is connected. It's early access, not every tenant has it, and it can change over time. If it's not there, the prompting guidance below still applies to whatever interface is available (a human pasting your suggested prompt into Mentor Web/Studio directly) — don't block on MCP access.
 
+**If a previously-working connection breaks** (`/mcp` reports something like `Failed to reconnect to outsystems`, or a tool call returns `Bearer token rejected: expired`): the underlying relay (commonly `outsystems-mcp-relay`) caches its OAuth token under `~/.mcp-auth/`, and the harness's own reconnect attempt reuses that cache — if the cached token itself is bad, reconnect keeps failing silently with no login prompt surfaced anywhere in the harness UI. Fix it by running the relay yourself, once, with `--force`:
+
+```bash
+outsystems-mcp-relay <remote-url> --force
+```
+
+Keep its stdin open past the process launch (e.g. via a named pipe) rather than piping in nothing — closing stdin immediately makes it exit before it does anything. Held open, it prints a fresh authorization URL and blocks waiting for the OAuth callback on a local port; open that URL yourself (or hand it to the user) and complete the login. The refreshed token lands in the same `~/.mcp-auth/` cache the harness's own connection reads, so a subsequent `/mcp` reconnect (or whatever the harness's reconnect mechanism is) picks it up without any separate login flow — no need to touch the harness's connection directly.
+
 The prompt-writing principles below are about the *content* of the prompt string — they apply whether a human typed it into a UI or you're constructing it as `mentor_start`'s `prompt` parameter. What does **not** transfer from the UI: Mentor Studio lets a human select an element in ODC Studio and say "fix this" or "explain this," using the selection as implicit context. There is no equivalent over the API — **always name the target explicitly** in the prompt text (the exact screen, action, or entity name) when calling `mentor_start`.
 
 ## Writing effective prompts

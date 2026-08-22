@@ -97,9 +97,19 @@ expected, not suspicious.
 
 **(project experience, not from the tool schema)**: entity/schema creation and standard CRUD
 wiring have been Mentor's most reliable case in practice on this project. If a run reports
-success while a subsequent context check still shows the change missing, that's been a known-gap
-pattern here rather than something worth retrying via more Mentor turns — but this is carried
-over from prior notes, not a documented guarantee, so treat it as a heuristic.
+success while a subsequent context check (`context_entities`/`context_screens`/`context_roles`)
+still shows the change missing, on at least one project this was confirmed to be a **Context
+Service read-side indexing lag**, not a failed or reverted Mentor change: the same publish's
+`env_app`/`app_info` already showed the new revision and `modelDigest`, and the change was
+independently confirmed by asking Mentor a read-only follow-up prompt on the same session
+("Don't make any changes. Just tell me...") — that reads Mentor's live view of the OML rather
+than the Context Service's cache, and answers immediately. The lag ran 1–3 minutes in practice,
+and once affected only one changed asset out of several published in the same revision while the
+others reindexed within seconds — so a mix of "some already updated, one still stale" isn't
+itself a sign of a partial failure. Two ways to handle it: wait and re-poll `context_*`, or ask
+Mentor directly for the immediate cross-check. Either way, don't retry the Mentor turn itself —
+the change already landed. Still one project's experience, not a documented platform guarantee —
+treat the mechanism (indexing lag) as more likely than not, but the exact timing as unconfirmed.
 
 ## Cancelling
 

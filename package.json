@@ -11,7 +11,7 @@
   "homepage": "https://flowmo.lol",
   "repository": {
     "type": "git",
-    "url": "https://github.com/izambasiron/create-flowmo"
+    "url": "git+https://github.com/izambasiron/create-flowmo.git"
   },
   "bugs": {
     "url": "https://github.com/izambasiron/create-flowmo/issues"

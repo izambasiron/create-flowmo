@@ -344,6 +344,13 @@ After designing action logic, verify:
 
 If any check fails, fix the design before presenting the output.
 
+## Pushing Logic to Real OutSystems
+
+Once logic designed here is validated locally, pushing it to a real OutSystems app happens
+through Mentor. Load the **outsystems-mentor** skill for how to phrase the prompt (entity/action
+naming, one focused change per turn) and how to drive `mentor_start` correctly (session
+resumption, polling, and why a `succeeded` status alone isn't proof the change landed).
+
 ## Gotchas
 
 1. **Client vs Server**: Never call Server Actions directly from OnRender. Use Data Actions for data fetching and explicit button/event handlers for mutations.

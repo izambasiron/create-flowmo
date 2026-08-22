@@ -65,15 +65,14 @@ and prints (or writes) a prompt describing exactly what to create in
 OutSystems — it does **not** call `mentor_start` itself. Submit the
 generated prompt yourself via `mentor_start`.
 
-Follow the platform's own operating rules while doing this:
-- **Checkpoint large changes.** Don't push a whole new data model in one
-  Mentor turn — split into logical turns (e.g. entities first, then
-  data-bound screens) and publish after each one.
-- **Ask for explicit approval before any `publish_start`/`deploy_start`** —
-  never publish without the user confirming first.
-- Poll `mentor_get_run` to a terminal `status` (`succeeded`/`failed`/
-  `cancelled`) before trusting a run is done — `complete` is a mid-run event
-  name, not a terminal state.
+For how to actually drive `mentor_start` — session resumption and token
+handling, safe retries, polling discipline, and why `status: succeeded`
+alone isn't proof the schema change landed — load the **outsystems-mentor**
+skill's [references/mentor-start-api.md](../../outsystems-mentor/references/mentor-start-api.md).
+It also covers the checkpointing and publish-approval rules, which apply
+here unchanged: don't push a whole new data model in one Mentor turn, and
+never call `publish_start`/`deploy_start` without the user's explicit
+approval first.
 
 ## 4. Confirm it actually landed
 

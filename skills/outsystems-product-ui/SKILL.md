@@ -101,6 +101,14 @@ Use Feedback Message or floating toasts for success states rather than redirecti
 
 Interactive cards should subtly lift on hover (translate + shadow change). Focus states should be visible and distinct from hover.
 
+## Pushing Screens to Real OutSystems
+
+Once a screen prototyped here is validated, pushing it to a real OutSystems app happens through
+Mentor Web/Studio prompts describing the UI pattern (table, card list, master detail, dashboard,
+etc.), or programmatically via `mentor_start` if the OutSystems MCP is connected. Load the
+**outsystems-mentor** skill for the pattern vocabulary Mentor recognizes, the attribute-count
+constraints per pattern, and how to drive `mentor_start` correctly.
+
 ## Gotchas
 
 - **Hardcoded colors** — never output hex codes in CSS if a CSS variable exists. Use `var(--color-primary)` instead of `#1068EB`. Custom hex values are fine for brand-specific colors that aren't in the OSUI palette.

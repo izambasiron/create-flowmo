@@ -10,12 +10,14 @@ This is a **flowmo** project — an OutSystems prototyping environment with a lo
 | Create or edit screens, UI, prototypes, visual HTML | `outsystems-ui` + `outsystems-product-ui` | `npm run dev`, `npm test` |
 | Design screen logic, actions, expressions | `outsystems-logic` | (none — OutSystems patterns only) |
 | Start dev server, preview screens in browser | `dev-workflow` | `npm run dev`, `npm run dev:agent` |
+| Push validated work to a real OutSystems app, write/run a Mentor prompt, run a curated Mentor task (quality/security/perf/accessibility review, test generation, demo data, demo readiness) | `outsystems-mentor` | `mentor_start` / `mentor_get_run` (requires outsystems MCP) |
 
 ## Standards (read when relevant)
 
 | Standard | When to read |
 |---|---|
 | `docs/flowmo-query-testing-standard.md` | Before writing or testing any SQL query |
+| `docs/outsystems-apps.md` | Before using the `outsystems` MCP tools — has asset/environment keys for the apps this project pushes to, so you don't have to search for them |
 
 ## Rules
 
@@ -31,6 +33,16 @@ This is a **flowmo** project — an OutSystems prototyping environment with a lo
 4. **Follow the screen folder convention**: `screens/{ticket}-{name}/index.visual.html`
 
 5. **Queries are tested via vitest** — each query file should have a matching test in `tests/`. Follow the pattern in `docs/flowmo-query-testing-standard.md`.
+
+6. **Keep `docs/outsystems-apps.md` reconciled.** If the `outsystems` MCP is connected
+   (`mcp__outsystems__*` tools present — it's early access, not every ODC environment has it):
+   before relying on `docs/outsystems-apps.md`, or the first time you read it in a session,
+   reconcile it against one `app_list`/`env_list` call scoped to the portfolio — add anything
+   new, fix anything renamed, flag (don't silently delete) anything listed that no longer
+   resolves. If a lookup keyed off an asset key in the doc comes back not-found, treat that as a
+   stale-doc signal and re-discover via `app_list`/`context_*` search rather than treating it as
+   a dead end. Record stable identifiers only (asset/environment keys, URLs) — never revision,
+   deploy status, or health; fetch those live every time.
 
 ## Project structure
 

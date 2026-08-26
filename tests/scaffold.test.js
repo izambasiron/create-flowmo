@@ -30,6 +30,17 @@ async function scaffold(projectName, platform = 'ODC') {
     await fs.copy(o11Skills, path.join(projectPath, '.agents/skills'));
   }
 
+  const claudeSkillsLink = path.join(projectPath, '.claude/skills');
+  const claudeSkillsTarget = path.relative(
+    path.join(projectPath, '.claude'),
+    path.join(projectPath, '.agents/skills')
+  );
+  await fs.ensureSymlink(claudeSkillsTarget, claudeSkillsLink, 'dir');
+
+  if (await fs.pathExists(path.join(TEMPLATE_DIR, 'CLAUDE.md'))) {
+    await fs.copy(path.join(TEMPLATE_DIR, 'CLAUDE.md'), path.join(projectPath, 'CLAUDE.md'));
+  }
+
   await fs.copy(path.join(TEMPLATE_DIR, 'theme'), path.join(projectPath, 'theme'));
   await fs.copy(path.join(TEMPLATE_DIR, 'scripts'), path.join(projectPath, 'scripts'));
   await fs.copy(path.join(TEMPLATE_DIR, 'screens'), path.join(projectPath, 'screens'));
@@ -88,6 +99,21 @@ describe('scaffold integration', () => {
 
   it('does not include the outsystems-sql-o11 skill for ODC projects', async () => {
     expect(await fs.pathExists(path.join(projectPath, '.agents/skills/outsystems-sql-o11'))).toBe(false);
+  });
+
+  it('symlinks .claude/skills -> .agents/skills so Claude Code discovers the same skills', async () => {
+    const linkPath = path.join(projectPath, '.claude/skills');
+    const stat = await fs.lstat(linkPath);
+    expect(stat.isSymbolicLink()).toBe(true);
+    // Resolves to the same skill set as .agents/skills, with no duplicated files.
+    expect(await fs.pathExists(path.join(linkPath, 'outsystems-sql'))).toBe(true);
+  });
+
+  it('creates a CLAUDE.md that imports AGENTS.md for Claude Code auto-loading', async () => {
+    const claudeMdPath = path.join(projectPath, 'CLAUDE.md');
+    expect(await fs.pathExists(claudeMdPath)).toBe(true);
+    const content = await fs.readFile(claudeMdPath, 'utf-8');
+    expect(content).toContain('@AGENTS.md');
   });
 
   it('generates a valid package.json with the correct name', async () => {

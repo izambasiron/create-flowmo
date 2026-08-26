@@ -42,6 +42,7 @@ The CLI then scaffolds a project with:
 - `scripts/` — Custom scripts
 - `theme/` — OutSystems UI CSS and custom theme
 - `.agents/skills/` — **Agent Skills**: Pre-packed expert knowledge (compliant with [agentskills.io](https://agentskills.io)) that teaches AI agents how to build for OutSystems.
+- `CLAUDE.md` and `.claude/skills/` — a bridge for Claude Code, which only auto-loads `CLAUDE.md` (not `AGENTS.md`) and only scans `.claude/skills/` (not `.agents/skills/`). `CLAUDE.md` imports `AGENTS.md` via `@AGENTS.md`, and `.claude/skills` is a symlink to `.agents/skills` — one source of truth, no duplicated files.
 
 
 ## After Scaffolding

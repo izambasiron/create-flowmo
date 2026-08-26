@@ -142,6 +142,17 @@ async function init() {
       await fs.copy(o11Skills, path.join(projectPath, '.agents/skills'));
     }
 
+    // Bridge .agents/skills -> .claude/skills: Claude Code only scans
+    // .claude/skills/ for Agent Skills, not .agents/skills/ (the agents.md
+    // convention this project follows). Symlink so both conventions share
+    // one source of truth instead of duplicating skill files.
+    const claudeSkillsLink = path.join(projectPath, '.claude/skills');
+    const claudeSkillsTarget = path.relative(
+      path.join(projectPath, '.claude'),
+      path.join(projectPath, '.agents/skills')
+    );
+    await fs.ensureSymlink(claudeSkillsTarget, claudeSkillsLink, 'dir');
+
     // Copy starter template files (CSS, starter screen, data, logic, components)
     const templateDir = path.join(__dirname, 'template');
     await fs.copy(path.join(templateDir, 'theme'), path.join(projectPath, 'theme'));
@@ -156,6 +167,12 @@ async function init() {
     // Copy AGENTS.md to project root for AI agent discovery
     if (fs.existsSync(path.join(templateDir, 'AGENTS.md'))) {
       await fs.copy(path.join(templateDir, 'AGENTS.md'), path.join(projectPath, 'AGENTS.md'));
+    }
+
+    // Copy CLAUDE.md (imports AGENTS.md via @path syntax) so Claude Code
+    // auto-loads the same project instructions without duplicating content.
+    if (fs.existsSync(path.join(templateDir, 'CLAUDE.md'))) {
+      await fs.copy(path.join(templateDir, 'CLAUDE.md'), path.join(projectPath, 'CLAUDE.md'));
     }
 
     // Generate package.json for the scaffolded project

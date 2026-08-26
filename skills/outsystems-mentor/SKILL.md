@@ -5,8 +5,11 @@ description: >-
   modifies real OutSystems apps) and driving the mentor_start MCP tool
   correctly when the OutSystems MCP is connected. Use whenever the developer
   wants to push validated Flowmo work (schema, logic, screens) to a real
-  OutSystems Developer Cloud app, asks how to phrase a Mentor prompt, or is
-  resuming/troubleshooting a mentor_start run. Cross-cutting: outsystems-sql,
+  OutSystems Developer Cloud app, asks how to phrase a Mentor prompt, is
+  resuming/troubleshooting a mentor_start run, or wants to run a curated
+  Mentor task (quality/security/performance/accessibility review, test
+  generation, doc-gap fill, refactor suggestions, model migration, demo
+  data, demo readiness — see references/task-prompts.md). Cross-cutting: outsystems-sql,
   outsystems-logic, and outsystems-product-ui all eventually push their
   output to OutSystems through Mentor.
 compatibility: Requires a live OutSystems MCP connection (mcp__outsystems__* tools) to actually call mentor_start; the prompting guidance applies regardless.

@@ -70,6 +70,55 @@ current schema.
 - A truncated event (`_truncated: true`, with an `_eventId` marker) can be fetched in full via
   `mentor_get_event(runId, eventId)` if you actually need the omitted bulky content.
 
+## Polling cadence (operation tiers)
+
+> Adapted from [`denwx/outsystems-mcp-skills`](https://github.com/denwx/outsystems-mcp-skills)
+> (MIT License), `skills/outsystems-mentor-polling-behavior` — cadence rules only, not the
+> Python telemetry scripts or HTML dashboards that skill also ships. This section **deepens**,
+> it does not replace, the "Polling" section above — the short version there (sleep exactly
+> `pollAfterMs`) is the safe minimum that works everywhere; this is the token-efficient
+> refinement worth applying on long runs specifically.
+
+Every `mcp__outsystems__*` tool falls into one of three tiers by how it should be polled. Getting
+the tier wrong in either direction costs tokens: a higher-tier strategy on a fast tool adds
+needless sleeps, a lower-tier strategy on a slow verbose tool floods context.
+
+- **Tier 1 — synchronous.** Tools like `app_list`, `app_info`, `context_entities`,
+  `context_screens` return immediately — call once, use the result, no polling at all.
+- **Tier 2 — fast async (~30s inline poll).** Tools like `publish_start`/`publish_status` or
+  `deploy_start`/`deploy_status` typically finish in 30–90s with compact intermediate responses:
+  sleep 30s, check status once, repeat if not terminal.
+- **Tier 3 — long/verbose async.** `mentor_get_run` is the only member of this tier for the tools
+  in this skill's scope — the rest of this section is about it specifically.
+
+**Why Tier 3 needs its own cadence:** Mentor runs typically take 2–10 minutes, and every poll
+during an active run carries the full batch of internal `applyModelApiCode` tool events (raw C#
+code, compilation output, validation messages) — often 10–50KB per response, irrelevant to the
+user. Naively polling at the server's 500ms `pollAfterMs` hint across a 2–10 minute run means
+50–100+ large responses entering context before completion — the hint is sized for a real-time UI
+progress bar, not an LLM agent where every response has a token cost.
+
+**Rule — drain before pausing:** Poll immediately after `mentor_start`, and keep polling
+immediately, back-to-back, *while the cursor is advancing* — Mentor events are cursor-paged and
+arrive in batches, so draining a batch is correctness (catching up to real state), not wasted
+tokens. Only when a poll returns no new events (drained) and status is still non-terminal, pause
+~30s before the next poll. Always pass the previous response's `nextCursor`. Stop at `succeeded`,
+`failed`, or `cancelled`; surface only the terminal result to the user, not the intermediate event
+stream.
+
+```text
+mentor_get_run(runId)                       # immediately after mentor_start, no cursor
+# while new events arrived (cursor advanced): poll again immediately
+mentor_get_run(runId, cursor=<nextCursor>)
+# once drained (no new events) and still running: sleep ~30s → poll → repeat
+# on succeeded/failed/cancelled: stop, use the terminal result
+```
+
+This cuts poll *count*, not per-poll verbosity (the verbosity is Mentor's own event payload, not
+something this cadence can shrink) — bounding a typical run to roughly 10–20 polls instead of
+100–200+ at the raw 500ms hint. No telemetry scripts, no HTML dashboards, no tier-override
+config — that machinery belongs to the upstream skill's own tooling, not this one.
+
 ## Resuming after a failed or cancelled run
 
 Don't default to starting a fresh `app_key` session just because a run ended in `failed` or

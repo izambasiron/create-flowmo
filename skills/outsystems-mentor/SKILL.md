@@ -57,6 +57,6 @@ Load [references/mentor-start-api.md](references/mentor-start-api.md) for the fu
 
 1. **First turn**: pass `app_key`. **Resume**: pass `mentor_session_id` + `mentor_session_token` — the token is echoed *only* in the previous run's **terminal** `mentor_get_run` result, never in `mentor_start`'s own response. Losing it means you can't resume that conversation.
 2. **Poll `mentor_get_run(runId)`** to a terminal `status` (`succeeded`/`failed`/`cancelled`) before doing anything else. Sleep exactly the `pollAfterMs` the response just gave you — it backs off as the run ages, don't cache or substitute your own interval.
-3. **`status: succeeded` is not proof anything landed.** Check the terminal result's `attempted_change`/`change_applied`/`validation`/`turn_error` fields.
+3. **`status: succeeded` is not proof anything landed.** Check the terminal result's `attempted_change`/`change_applied`/`validation`/`turn_error` fields. After `change_applied` and a publish, verify the live behavior via `outsystems-live-testing` rather than trusting the completion signal alone.
 4. **Checkpoint large changes** — one logical turn at a time (entities, then data-bound screens, etc.), not a whole data model in one turn.
 5. **Never call `publish_start`/`deploy_start` without the user's explicit approval first**, regardless of which skill's work triggered the Mentor turn.

@@ -196,3 +196,5 @@ If you have a live OutSystems MCP connection this session (check for OutSystems 
 ## Testing Queries with the Flowmo CLI
 
 Read `references/flowmo-cli.md` when running or testing queries locally with the Flowmo CLI. It covers `db:setup`/`db:seed`/`db:reset`, `db:query` usage, flags, parameter types, and a workflow checklist.
+
+`db:query` tests against the local PGLite mirror; to test against the live tenant DB, load `outsystems-live-testing`.

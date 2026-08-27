@@ -91,7 +91,7 @@ export function mount(root, props = {}) {
                     ${breadcrumbs.map((crumb, i) => `
                       <div class="breadcrumbs-item">
                         <div class="title"><a href="#">${esc(crumb)}</a></div>
-                        ${i < breadcrumbs.length - 1 ? '<div class="ph" aria-hidden="true"><i class="icon fa fa-angle-right fa-1x"></i></div>' : ''}
+                        ${i < breadcrumbs.length - 1 ? '<div class="placeholder-empty" aria-hidden="true"><i class="icon fa fa-angle-right fa-1x"></i></div>' : ''}
                       </div>
                     `).join('')}
                   </div>

@@ -182,6 +182,7 @@ If any check fails, fix the query before presenting the output.
 8. **Date Comparisons**: O11 uses `BETWEEN` or `DATEDIFF`. ODC prefers range comparisons with `>=` and `<` or `EXTRACT()`.
 9. **Aggregate Functions in WHERE**: Use `HAVING` for aggregate conditions — `WHERE` runs before `GROUP BY`.
 10. **Index Awareness**: Filter on indexed attributes when possible. In O11 check Query Analyzer; in ODC check the database logs.
+11. **Never use `/* */` block comments in ODC Advanced SQL — use `--` line comments only.** ODC's Advanced Query preprocessor does a text-level `{Entity}`/`[Attribute]` substitution over the whole query text; it is not a real SQL-aware comment stripper and can mishandle `/* */` blocks (especially large multi-line ones, or ones whose prose mentions `{EntityName}`). This can leave a literal `{` in the SQL actually sent to the database, which Postgres then rejects with `OS-BERT-60407: syntax error at or near "{"` — even though the exact same query text runs cleanly when tested directly (e.g. via the Developer Dashboard's Test SQL tool, which just runs raw Postgres). Confirmed on ssr-test: a `GetInvoiceHierarchyJson_Edit.advance.sql` with a `/* */` doc-header threw this error when deployed; converting every comment (including large doc-header blocks) to `--` fixed it, with no logic change. Applies to header/doc comments and inline comments alike — before considering any `.advance.sql` change done, confirm the file contains no `/*` or `*/`.
 
 ---
 

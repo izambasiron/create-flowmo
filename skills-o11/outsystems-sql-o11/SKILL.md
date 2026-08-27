@@ -49,7 +49,7 @@ Follow these steps **in order** for every new query:
 ### Step 1 — Write the PostgreSQL version first
 
 Create `database/sql/MyQuery_postgres.advance.sql` using PostgreSQL syntax.
-Use lowercase table and column names that match your `database/schema.sql`.
+Use lowercase table and column names that match your `database/schema.os.sql`/`schema.local.sql`.
 
 ```sql
 -- MyQuery_postgres.advance.sql
@@ -70,7 +70,7 @@ LIMIT @MaxRecords
 ```
 
 Rules for the PostgreSQL version:
-- Lowercase snake_case table and column names (matching `schema.sql`)
+- Lowercase snake_case table and column names (matching `schema.os.sql`/`schema.local.sql`)
 - `true`/`false` for booleans — BUT remember Flowmo schemas store booleans as `INTEGER (1/0)`, so use `= 1` / `= 0`
 - `NOW()` for current timestamp
 - `LIMIT @MaxRecords` for row caps

@@ -7,7 +7,7 @@ After writing a query, always test it locally using `flowmo db:query` before con
 The local database must be provisioned and seeded first:
 
 ```bash
-npx flowmo db:setup   # drop and recreate schema from database/schema.sql
+npx flowmo db:setup   # drop and recreate schema from database/schema.os.sql + schema.local.sql
 npx flowmo db:seed    # insert seed data (auto-discovers database/seeds/ or database/seeds.sql)
 ```
 

@@ -1,6 +1,6 @@
 # ODC to Flowmo Schema (AI Bridge)
 
-When a developer wants to mirror their ODC data model into a local Flowmo project, generate a PostgreSQL `CREATE TABLE` script compatible with PGLite. This is the primary way to set up `database/schema.sql` before running `flowmo db:setup`.
+When a developer wants to mirror their ODC data model into a local Flowmo project, generate a PostgreSQL `CREATE TABLE` script compatible with PGLite. This is the manual/Forge-component way to set up `database/schema.os.sql` before running `flowmo db:setup` — mirroring entities that already exist in OutSystems. If instead you're designing new entities that don't exist in ODC yet, they belong in `database/schema.local.sql`, not here — see `references/mcp-schema-sync.md` for the os.sql/local.sql split.
 
 ## Conversion Rules
 
@@ -59,7 +59,7 @@ When asked to generate a Flowmo schema from an ODC data model:
 
 1. Ask the developer to describe their entities or paste the ODC diagram description. Accept screenshots too — extract entity names and attributes from them.
 2. Apply all conversion rules above.
-3. Output the raw SQL directly — it can be pasted into `database/schema.sql`.
+3. Output the raw SQL directly — it can be pasted into `database/schema.os.sql`.
 4. Remind them to run `flowmo db:setup` after saving.
 
-> **Tip for users without direct DB access:** Ask OutSystems Mentor AI to generate a PostgreSQL CREATE TABLE script from your data model, then paste it into `database/schema.sql` and adjust as needed using this skill.
+> **Tip for users without direct DB access:** Ask OutSystems Mentor AI to generate a PostgreSQL CREATE TABLE script from your data model, then paste it into `database/schema.os.sql` and adjust as needed using this skill.

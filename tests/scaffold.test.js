@@ -155,7 +155,8 @@ describe('scaffold integration', () => {
   });
 
   it('copies the starter database files', async () => {
-    expect(await fs.pathExists(path.join(projectPath, 'database/schema.sql'))).toBe(true);
+    expect(await fs.pathExists(path.join(projectPath, 'database/schema.os.sql'))).toBe(true);
+    expect(await fs.pathExists(path.join(projectPath, 'database/schema.local.sql'))).toBe(true);
     expect(await fs.pathExists(path.join(projectPath, 'database/seeds.sql'))).toBe(true);
   });
 

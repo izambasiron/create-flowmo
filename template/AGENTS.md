@@ -53,7 +53,8 @@ components/                  ← reusable components (layouts, widgets, business
 database/
   ├── schema.os.sql          ← OutSystems schema (via flowmo-forge — DO NOT EDIT)
   ├── schema.local.sql       ← local-only additions
-  ├── schema.sql             ← concatenated: os + local (used by db:setup)
+  │                            (db:setup concatenates both in memory — no
+  │                            schema.sql file is written to disk)
   └── sql/                   ← OutSystems Advanced SQL queries (*.advance.sql)
 theme/                       ← CSS (outsystems-ui.css, grid.css, theme.css)
 tests/                       ← vitest test files

@@ -1,0 +1,11 @@
+-- ============================================================
+-- schema.os.sql — OutSystems live schema (mirror)
+-- ============================================================
+-- Never hand-edit this file — always replace it wholesale from a fresh
+-- pull: `flowmo schema:pull` (MCP path) or the Flowmo Schema Builder Forge
+-- component + manual paste (no-MCP path). See the `outsystems-sql` skill's
+-- `references/mcp-schema-sync.md` and `references/odc-schema.md`.
+--
+-- Local-only additions (not yet in OutSystems) go in schema.local.sql
+-- instead — `flowmo db:setup` concatenates both when present.
+-- ============================================================

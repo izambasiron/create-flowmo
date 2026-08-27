@@ -164,6 +164,12 @@ async function init() {
     await fs.copy(path.join(templateDir, 'tests'), path.join(projectPath, 'tests'));
     await fs.copy(path.join(templateDir, 'docs'), path.join(projectPath, 'docs'));
 
+    // Copy .gitignore — named "gitignore" (no leading dot) in the template
+    // because npm's packlist silently drops any file literally named
+    // .gitignore from the published tarball, even nested ones matched by
+    // the "files" field. Rename it back on the way into the new project.
+    await fs.copy(path.join(templateDir, 'gitignore'), path.join(projectPath, '.gitignore'));
+
     // Copy AGENTS.md to project root for AI agent discovery
     if (fs.existsSync(path.join(templateDir, 'AGENTS.md'))) {
       await fs.copy(path.join(templateDir, 'AGENTS.md'), path.join(projectPath, 'AGENTS.md'));

@@ -48,6 +48,7 @@ async function scaffold(projectName, platform = 'ODC') {
   await fs.copy(path.join(TEMPLATE_DIR, 'logic'), path.join(projectPath, 'logic'));
   await fs.copy(path.join(TEMPLATE_DIR, 'tests'), path.join(projectPath, 'tests'));
   await fs.copy(path.join(TEMPLATE_DIR, 'docs'), path.join(projectPath, 'docs'));
+  await fs.copy(path.join(TEMPLATE_DIR, 'gitignore'), path.join(projectPath, '.gitignore'));
 
   const pkg = buildPackageJson(projectName, 'ODC', 'reactive');
   await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
@@ -167,6 +168,13 @@ describe('scaffold integration', () => {
   it('copies the reference query test and testing standard', async () => {
     expect(await fs.pathExists(path.join(projectPath, 'tests/example-query.test.js'))).toBe(true);
     expect(await fs.pathExists(path.join(projectPath, 'docs/flowmo-query-testing-standard.md'))).toBe(true);
+  });
+
+  it('writes a .gitignore that excludes node_modules', async () => {
+    const gitignorePath = path.join(projectPath, '.gitignore');
+    expect(await fs.pathExists(gitignorePath)).toBe(true);
+    const contents = await fs.readFile(gitignorePath, 'utf-8');
+    expect(contents).toContain('node_modules/');
   });
 
   it('copies the starter logic files', async () => {

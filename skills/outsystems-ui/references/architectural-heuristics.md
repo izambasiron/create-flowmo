@@ -4,16 +4,35 @@ Deep technical guide for automated agents interfacing with the OutSystems UI DOM
 
 ## 1. CSS Load Hierarchy & Scope
 
-OutSystems injects style sheets into the head in a deterministic sequence:
-1.  **Base Theme CSS**: Foundational OSUI styles.
-2.  **Application Theme CSS**: Global custom styles.
-3.  **Screen CSS**: Screen-specific logic.
-4.  **Web Block CSS**: Reusable component styles (evaluated *after* Screen CSS).
-5.  **Theme Editor CSS**: Dynamically generated styles.
-6.  **Inline CSS**: Widget-level attribute panel styles.
+**ODC (Developer Cloud), confirmed empirically** by reading `document.styleSheets` on a live
+deployed app (source: `flowmo/reviews/2026-08-29-efm-cargo-retro.md` §2 — corrects this section's
+previous claim, which was written at initial release with no live verification and had the order
+backwards):
+
+1.  **Web Block CSS** — loads *first*. Counter to what you'd expect: a Block's stylesheet is
+    bundled module-wide (not scoped to the block) and it is evaluated *before* the platform's own
+    OSUI rules.
+2.  **`outsystems-ui.css` (Base Theme)** — OSUI's own rules load next and win any specificity tie
+    against a Block rule.
+3.  **Application Theme CSS / Theme Editor CSS** — safe: always loads after OSUI.
+4.  **Screen CSS** — safe: loads last.
 
 > [!WARNING]
-> **Scope Bleeding**: Because Web Block CSS is loaded *after* Screen CSS, un-namespaced rules in a block will override identical classes on the parent Screen. **Always namespace Web Block styles** in a unique parent class.
+> **Load order does not favor the Block.** Because Block CSS loads *before* OSUI, a Block rule
+> that merely *ties* an OSUI rule's specificity (e.g. a bare `.card` selector against OSUI's own
+> `.card`) wins in a naive local preview — where component CSS is typically loaded last — but
+> **loses live**, since OSUI's same-specificity rule loads after it there. Do not rely on load
+> order to make a Block rule win. Qualify the selector with a class the element already carries
+> instead (`.card.my-block__card`, not `.card`). This cost three confirmed live bugs in one
+> project (wrong card background, lost OSUI padding on two containers) before the local preview
+> was corrected to mirror this exact order — verify Block CSS overrides against a harness that
+> loads Block → OSUI → Theme → Screen, not one that loads OSUI first.
+>
+> **Namespace Web Block styles regardless** — a unique parent class per block is still the
+> baseline hygiene that makes the qualifying-selector fix above possible in the first place.
+>
+> *If a project targets O11 rather than ODC and observes a different order there, that needs its
+> own live verification before this section is split by platform — the claim above is ODC-only.*
 
 ---
 
@@ -30,6 +49,16 @@ The OutSystems compiler injects proprietary wrappers that can disrupt Flexbox an
 - **Trigger**: Wraps Web Blocks and Placeholders.
 - **Effect**: Intercepts Flex/Grid rules between a parent and its intended children.
 - **Heuristic**: Apply `display: contents;` to the wrapper to bypass its box model and promote children to the parent formatting context.
+- **Caveat — scope this, don't apply it globally.** `.OSBlockWidget` is a platform-generic class,
+  and per §1, Block CSS (where you'd naturally reach for this rule) is bundled **module-wide** —
+  an unscoped `.OSBlockWidget { display: contents; }` reaches every Block in the module, not just
+  the one you're fixing. Where the goal is specifically re-establishing a broken flex/grid height
+  chain (a Block's content not stretching to fill a fixed-height flex parent), confirmed live
+  fix scoped it to the parent context instead: `.right-panel *:has(.my-block) { display: flex;
+  flex-direction: column; flex: 1; min-height: 0; }` — `:has()` reaches through however many
+  wrapper layers the platform actually inserts (it may be more than one), rather than assuming
+  exactly one `.OSBlockWidget` layer. Prefer this scoped-and-`:has()`-qualified form when the fix
+  is for one block's layout, not a project-wide rule.
 
 ---
 
@@ -100,7 +129,7 @@ OSUI uses `.btn + .btn { margin-left: var(--space-m); }` to separate buttons.
 | Wrapper | Trigger | Layout Disruption | Heuristic Override |
 |---------|---------|-------------------|--------------------|
 | `.OSInline` | Container without explicit width | Forces `display: inline-block`, breaks flex/grid | Chained selector: `.custom-class.OSInline { display: flex; }` |
-| `.OSBlockWidget` | Wraps Web Blocks & Placeholders | Intercepts parent flex/grid child targeting | `display: contents;` to bypass box model |
+| `.OSBlockWidget` | Wraps Web Blocks & Placeholders | Intercepts parent flex/grid child targeting | `display: contents;` to bypass box model — scope it (see §2), it's module-wide |
 | `.list.list-group` | List widget container | `overflow: hidden` clips tooltips/popovers | `overflow: visible;` via chained class |
 | `.validation-message` | Form validation error | `position: absolute` overlaps dense layouts | `position: static !important;` |
 

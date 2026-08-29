@@ -92,6 +92,14 @@ describe('buildPackageJson', () => {
     expect(buildPackageJson('my-app', 'ODC', 'mobile').flowmo.appType).toBe('mobile');
   });
 
+  it('defaults iconLibrary to font-awesome when not given', () => {
+    expect(buildPackageJson('my-app', 'ODC', 'reactive').flowmo.iconLibrary).toBe('font-awesome');
+  });
+
+  it('embeds an explicit iconLibrary in the flowmo config field', () => {
+    expect(buildPackageJson('my-app', 'ODC', 'reactive', 'phosphor').flowmo.iconLibrary).toBe('phosphor');
+  });
+
   it('includes the expected dev scripts', () => {
     const pkg = buildPackageJson('my-app', 'ODC', 'reactive');
     expect(pkg.scripts.dev).toBe('vite --open');

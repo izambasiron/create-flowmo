@@ -10,10 +10,12 @@ import { validateProjectName, sanitizeProjectName, buildPackageJson } from './sr
 const { values: flags, positionals } = parseArgs({
   args: process.argv.slice(2),
   options: {
-    odc:      { type: 'boolean' },
-    o11:      { type: 'boolean' },
-    reactive: { type: 'boolean' },
-    mobile:   { type: 'boolean' },
+    odc:          { type: 'boolean' },
+    o11:          { type: 'boolean' },
+    reactive:     { type: 'boolean' },
+    mobile:       { type: 'boolean' },
+    phosphor:     { type: 'boolean' },
+    'font-awesome': { type: 'boolean' },
   },
   allowPositionals: true,
   strict: false,
@@ -25,6 +27,10 @@ if (flags.odc && flags.o11) {
 }
 if (flags.reactive && flags.mobile) {
   console.error('Cannot use --reactive and --mobile together.');
+  process.exit(1);
+}
+if (flags.phosphor && flags['font-awesome']) {
+  console.error('Cannot use --phosphor and --font-awesome together.');
   process.exit(1);
 }
 
@@ -118,6 +124,25 @@ async function init() {
     }
   }
 
+  // 4. Icon Library (--phosphor / --font-awesome flag or prompt)
+  let iconLibrary;
+  if (flags.phosphor || flags['font-awesome']) {
+    iconLibrary = flags.phosphor ? 'phosphor' : 'font-awesome';
+  } else {
+    iconLibrary = await select({
+      message: 'Which icon library do you want to scaffold screens with?',
+      options: [
+        { value: 'font-awesome', label: 'Font Awesome 4.7 (default)' },
+        { value: 'phosphor', label: 'Phosphor Icons 2.0' },
+      ],
+    });
+
+    if (isCancel(iconLibrary)) {
+      outro('Cancelled.');
+      process.exit(0);
+    }
+  }
+
   const s = spinner();
   s.start('Scaffolding your project...');
 
@@ -182,7 +207,7 @@ async function init() {
     }
 
     // Generate package.json for the scaffolded project
-    const pkg = buildPackageJson(projectName, platform, appType);
+    const pkg = buildPackageJson(projectName, platform, appType, iconLibrary);
     await fs.writeJson(path.join(projectPath, 'package.json'), pkg, { spaces: 2 });
 
     // Generate vite config for multi-page HTML

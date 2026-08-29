@@ -163,3 +163,24 @@ OSUI uses `.btn + .btn { margin-left: var(--space-m); }` to separate buttons.
 | Reusability | Modules (Dependency Hell) | Libraries (Isolated Containers) |
 | Legacy | Supports Traditional Web | Reactive Only (Strict) |
 | CSS Isolation | Shared across tenant | Isolated per Application |
+
+---
+
+## 9. Native `[hidden]` Loses to OSUI's Own Display Rules
+
+- **Trigger**: An element toggled with the native `hidden` attribute (or `el.hidden = true`) sits
+  inside a pattern OSUI itself gives a `display` value — the Accordion content panel is the
+  confirmed case (`.osui-accordion-item__content { display: block; }`).
+- **Effect**: `hidden` sets `display: none` via the UA stylesheet, which carries **no CSS
+  specificity** — any author rule with a real selector beats it on the cascade, `!important` or
+  not. OSUI's own `display: block` on the same element wins, and a "collapsed" panel renders
+  visibly open with no error anywhere.
+- **Heuristic**: Add one global override rather than fighting this per-component:
+  ```css
+  [hidden] {
+      display: none !important;
+  }
+  ```
+  This is one of the few cases where a global `!important` on a plain attribute selector is the
+  right call — it restores the UA behavior `hidden` is supposed to have, rather than overriding
+  a specific OSUI class.

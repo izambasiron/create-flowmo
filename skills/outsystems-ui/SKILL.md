@@ -5,10 +5,14 @@ description: >
   CSS classes. Use when creating .visual.html prototypes, building UI screens,
   styling components, using layout patterns (Cards, Columns, Forms, Tables, Tabs),
   applying spacing, colors, typography, or scaffolding screens — even if the user
-  doesn't mention "OutSystems" explicitly. Covers all 90 UI patterns across 8
-  categories, 16 core widgets, the full screen workflow (generate → self-check →
-  dev server with npm run dev → visual verification), layout components, and
-  the complete design token system (spacing, colors, borders, shadows, typography).
+  doesn't mention "OutSystems" explicitly. Also covers authoring a reusable
+  component under components/business/ (the render(props) contract, demo.js,
+  what makes a component portable to OutSystems via flowmo block:build) — use
+  when asked to create or edit a reusable/shared component, not just a screen.
+  Covers all 90 UI patterns across 8 categories, 16 core widgets, the full
+  screen workflow (generate → self-check → dev server with npm run dev →
+  visual verification), layout components, and the complete design token
+  system (spacing, colors, borders, shadows, typography).
 compatibility: Requires outsystems-ui.css linked in the HTML file. Designed for VS Code agents.
 metadata:
   version: "1.2"
@@ -285,6 +289,11 @@ These behaviors are active in the `outsystems-ui.css` theme and affect visual re
 | **Validation Overlap** | `.validation-message` uses `position: absolute`. | Overlaps elements below in dense forms. Use `position: static` override. |
 
 **Load [references/architectural-heuristics.md](references/architectural-heuristics.md)** for deep platform behaviors (OSInline, OSBlockWidget, List Virtualization).
+
+**Load [references/business-components.md](references/business-components.md)** when creating or
+editing anything under `components/business/` — the `render(props) → HTML string` contract, the
+`demo.js` convention, and the read-only-vs-native-widget rule that make a component portable via
+`npx flowmo block:build`.
 
 ## Responsive & Device Classes
 

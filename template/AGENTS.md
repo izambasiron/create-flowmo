@@ -10,6 +10,7 @@ This is a **flowmo** project — an OutSystems prototyping environment with a lo
 | Create or edit screens, UI, prototypes, visual HTML | `outsystems-ui` + `outsystems-product-ui` | `npm run dev`, `npm test` |
 | Design screen logic, actions, expressions | `outsystems-logic` | (none — OutSystems patterns only) |
 | Start dev server, preview screens in browser | `dev-workflow` | `npm run dev`, `npm run dev:agent` |
+| Bundle `components/business/**` into a Script resource + paste README for a real OutSystems module | `outsystems-ui` (see `references/business-components.md`) | `npx flowmo block:build` |
 | Push validated work to a real OutSystems app, write/run a Mentor prompt, run a curated Mentor task (quality/security/perf/accessibility review, test generation, demo data, demo readiness) | `outsystems-mentor` | `mentor_start` / `mentor_get_run` (requires outsystems MCP) |
 | Test the live app after a push — query its Dev DB, invoke actions, verify a change landed | `outsystems-live-testing` | `test_setup_start`, `db_query`, `exec_in_app` (requires outsystems MCP) |
 

@@ -57,7 +57,9 @@ database/
   │                            (db:setup concatenates both in memory — no
   │                            schema.sql file is written to disk)
   └── sql/                   ← OutSystems Advanced SQL queries (*.advance.sql)
-theme/                       ← CSS (outsystems-ui.css, grid.css, theme.css)
+theme/                       ← CSS (outsystems-ui.css, grid.css, theme.css, local.css)
+                                theme.css: candidate to paste into the live app's Theme
+                                local.css: never pastes — prototype-only compensations
 tests/                       ← vitest test files
 docs/                        ← flowmo tooling documentation
 ```

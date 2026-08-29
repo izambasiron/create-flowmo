@@ -1,6 +1,12 @@
 /* ── Project Theme ─────────────────────────────────────
    Override OutSystems UI variables and add custom styles here.
    This file loads after outsystems-ui.css and grid.css.
+
+   Everything here is a candidate to paste into the real OutSystems app's
+   Theme once you're porting screens/components there — so the test for
+   anything added is:
+     "Would pasting this into the live app's Theme change a screen that
+      isn't ours?"  No -> here.  Yes -> theme/local.css instead.
 ──────────────────────────────────────────────────────── */
 
 /* ── 1. Brand tokens ─────────────────────────────────── */

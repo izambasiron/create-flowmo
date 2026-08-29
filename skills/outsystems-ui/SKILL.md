@@ -383,8 +383,10 @@ Every project ships three CSS files and one JS file, loaded in this order:
 
 1. **`outsystems-ui.css`** — the OSUI framework (patterns, utilities, layout). Never edit this.
 2. **`grid.css`** — platform grid definitions (`.ThemeGrid_Container` max-width, `.ThemeGrid_Width*` columns, `.ThemeGrid_MarginGutter` spacing, `.active-screen` scroll model). Normally injected by OutSystems at runtime — we provide it statically. Never edit this.
-3. **`theme.css`** — project-specific brand tokens and custom styles. This is the only file you should edit.
+3. **`theme.css`** — project-specific brand tokens and custom styles, and the only file that's a candidate to paste into the real app's Theme once you're porting. This is the file you should edit for anything that belongs there.
 4. **`device-detect.js`** (in `scripts/`) — viewport detection script that applies `phone`/`tablet`/`desktop` + `portrait`/`landscape` classes to `<body>`. Required for responsive column breaks and `display-on-device-*` classes. Never edit this.
+5. **`local.css`** (optional, ships empty) — prototype-only compensations that must **never** be pasted into the real app's Theme, because the real app already provides them from its own runtime/settings (e.g. widening `.ThemeGrid_Container` past `grid.css`'s static max-width). Not linked by default — add
+   `<link rel="stylesheet" href="../theme/local.css" />` to a screen once you have something to put in it. See the header comment in `theme/local.css` for the routing test (it's `theme.css`'s test, inverted).
 
 All three `<link>` tags must be present in `<head>`, and the script at the bottom of `<body>`:
 ```html
@@ -426,6 +428,18 @@ All three `<link>` tags must be present in `<head>`, and the script at the botto
 - Don't redefine grid classes (`.ThemeGrid_*`) — those belong in `grid.css`
 - Don't add `@media` queries — OSUI handles responsiveness
 - Don't override `.btn` base styles — create new named classes instead
+
+### Porting: component CSS loads before outsystems-ui.css, not after
+
+The three-file order above is for a static prototype screen and stays correct — `theme.css`
+overriding OSUI's `:root` tokens depends on `theme.css` loading *after* `outsystems-ui.css`, and
+that doesn't change. But once a screen also links a `components/business/<name>/index.css` (see
+`references/business-components.md`), that link needs to go **before** `outsystems-ui.css`, not
+after: a real OutSystems module loads Block CSS before OSUI, so a component rule that merely ties
+an OSUI rule's specificity wins in a naive `outsystems-ui.css`-first local preview but loses live.
+See `references/architectural-heuristics.md` §1 for the full cascade order and why. `npx flowmo
+block:build`'s generated `verify.html` already gets this order right automatically — this note is
+for wiring a component's CSS into a screen's own `.visual.html` by hand.
 
 ### Common OSUI specificity traps
 

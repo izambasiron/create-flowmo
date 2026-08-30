@@ -31,6 +31,16 @@ backwards):
 > **Namespace Web Block styles regardless** — a unique parent class per block is still the
 > baseline hygiene that makes the qualifying-selector fix above possible in the first place.
 >
+> **The qualifying class has to be *compounded* onto the same selector, not written as its own
+> independent rule.** Confirmed live, 2026-08-30, on a second app: a Block CSS rule like
+> `.my-block { border: ...; }`, applied to an element that also carries `.card`, **still loses** to
+> OSUI's own `.card { border: ...; }` — even though `.my-block` is uniquely named and doesn't
+> collide with OSUI's own vocabulary. Equal-specificity cascade resolves per CSS *property*, by
+> whichever rule loads later, across *every* rule that matches the element — it doesn't care
+> whether the winning rule's selector happens to share a name with yours. The fix is the compound
+> form from the example above (`.card.my-block__card`), which raises specificity above the plain
+> `.card` rule; a same-specificity rule on a separate class, however uniquely named, does not.
+>
 > *If a project targets O11 rather than ODC and observes a different order there, that needs its
 > own live verification before this section is split by platform — the claim above is ODC-only.*
 

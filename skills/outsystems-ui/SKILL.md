@@ -6,9 +6,10 @@ description: >
   styling components, using layout patterns (Cards, Columns, Forms, Tables, Tabs),
   applying spacing, colors, typography, or scaffolding screens — even if the user
   doesn't mention "OutSystems" explicitly. Also covers authoring a reusable
-  component under components/business/ (the render(props) contract, demo.js,
-  what makes a component portable to OutSystems via flowmo block:build) — use
-  when asked to create or edit a reusable/shared component, not just a screen.
+  component under components/business/ (the Component base class contract,
+  interactive components included, demo.js, what makes a component portable to
+  OutSystems via flowmo block:build) — use when asked to create or edit a
+  reusable/shared component, not just a screen.
   Covers all 90 UI patterns across 8 categories, 16 core widgets, the full
   screen workflow (generate → self-check → dev server with npm run dev →
   visual verification), layout components, and the complete design token
@@ -291,9 +292,10 @@ These behaviors are active in the `outsystems-ui.css` theme and affect visual re
 **Load [references/architectural-heuristics.md](references/architectural-heuristics.md)** for deep platform behaviors (OSInline, OSBlockWidget, List Virtualization).
 
 **Load [references/business-components.md](references/business-components.md)** when creating or
-editing anything under `components/business/` — the `render(props) → HTML string` contract, the
-`demo.js` convention, and the read-only-vs-native-widget rule that make a component portable via
-`npx flowmo block:build`.
+editing anything under `components/business/` — the `Component` base class contract (one contract,
+two levels of ceremony: presentational or interactive), the state-preservation rule, the `demo.js`
+convention, and the `OnReady`/`OnParametersChanged`/`OnDestroy` mapping that make a component
+portable via `npx flowmo block:build` — interactive components included, not just read-only ones.
 
 ## Responsive & Device Classes
 

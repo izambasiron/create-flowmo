@@ -96,7 +96,11 @@ trusting this copy to stay byte-for-byte in sync.)
 - **Cross-imports are allowed from `components/shared/`, never from another component.** A
   component's `index.js` may `import` a named export from a file under `components/shared/` (e.g.
   `import { esc } from '../../shared/esc.js';`), but must not import another business component.
-  Each component file needs to stand alone relative to its siblings.
+  Each component file needs to stand alone relative to its siblings. Files under
+  `components/shared/` may import each other with a relative named import (`import { esc } from
+  './esc.js';`) and nothing else: `block:build` concatenates them into one script, drops those
+  imports, and orders each file after the ones it imports. Don't use `export default` in a
+  component, and don't name a component folder `shared` or `component`; `block:build` skips those.
 - **Why this is a hard rule, not a style preference:** OutSystems can't host ES modules.
   `flowmo block:build` bundles each component by stripping its `export` keyword and wrapping the
   rest in an IIFE — a cross-component import would break silently or not at all under that

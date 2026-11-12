@@ -70,7 +70,7 @@ All parameter values are passed as strings in the JSON object. The database coer
 # Integers
 npx flowmo db:query ... '{"UserId": "1", "MaxRecords": "10"}'
 
-# Booleans (stored as INTEGER — pass "1" or "0")
+# Booleans (stored as 1/0 numbers — pass "1" or "0")
 npx flowmo db:query ... '{"IsActive": "1", "CanViewPrice": "0"}'
 
 # Empty string (for optional text filters)

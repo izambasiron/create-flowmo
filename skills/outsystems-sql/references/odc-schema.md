@@ -13,18 +13,18 @@ When a developer wants to mirror their ODC data model into a local Flowmo projec
    | Integer | `INTEGER` |
    | Long Integer | `BIGINT` |
    | Decimal | `NUMERIC(18, 2)` |
-   | Boolean | `INTEGER` (use `1`/`0` to match OutSystems O11 storage) |
+   | Boolean | `NUMERIC(28,8)` (ODC stores Boolean as numeric `1`/`0`; compare with `= 1`, not `= TRUE`) |
    | Date Time | `TIMESTAMPTZ` |
-   | Date | `DATE` |
+   | Date | `TIMESTAMPTZ` (ODC stores Date as timestamptz, not `date`) |
    | Binary Data | `BYTEA` |
    | Email | `TEXT` |
    | Phone Number | `TEXT` |
    | Currency | `NUMERIC(18, 2)` |
 
-3. Every table gets `id SERIAL PRIMARY KEY` as the first column (or `BIGSERIAL` if the ODC identifier is Long Integer).
-4. OutSystems foreign key attributes (e.g., `UserId`) become `INTEGER REFERENCES parent_table(id)`.
+3. The identifier of a **non-static** entity is auto-number: `SERIAL PRIMARY KEY` for Integer, `BIGSERIAL` for Long Integer. A **static** entity's identifier is a plain `INTEGER PRIMARY KEY` (its ids are fixed records), and a Text identifier stays `TEXT PRIMARY KEY`.
+4. OutSystems foreign key attributes (e.g., `UserId`) take the **type of the referenced primary key**: `BIGINT REFERENCES parent_table(id)` for a Long Integer id, `INTEGER` for Integer, `TEXT` for a Text id. If that key is itself a foreign key (an extension entity sharing its parent's id), follow it to the base type.
 5. OutSystems attributes are **NOT NULL by default** — apply `NOT NULL` unless the attribute is explicitly optional.
-6. Add `DEFAULT 1` / `DEFAULT 0` for Boolean (INTEGER) attributes that have a default set.
+6. Add `DEFAULT 1` / `DEFAULT 0` for Boolean (`NUMERIC`) attributes that have a default set.
 7. Add `DEFAULT NOW()` for Date Time attributes named `CreatedAt`, `CreatedOn`, or similar creation timestamps.
 8. Output **only raw SQL** — no markdown fences, no explanations, no `CREATE SCHEMA` statements.
 9. Precede each table with a comment: `-- Table: table_name`.
@@ -48,7 +48,7 @@ CREATE TABLE users (
   id         BIGSERIAL    PRIMARY KEY,
   name       TEXT         NOT NULL,
   email      TEXT         NOT NULL,
-  is_active  INTEGER      NOT NULL DEFAULT 1,
+  is_active  NUMERIC(28,8) NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 ```

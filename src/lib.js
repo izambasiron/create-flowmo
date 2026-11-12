@@ -33,9 +33,10 @@ export function sanitizeProjectName(name) {
  * @param {string} projectName
  * @param {'ODC'|'O11'} platform
  * @param {'reactive'|'mobile'} appType
+ * @param {'font-awesome'|'phosphor'} [iconLibrary='font-awesome']
  * @returns {object}
  */
-export function buildPackageJson(projectName, platform, appType) {
+export function buildPackageJson(projectName, platform, appType, iconLibrary = 'font-awesome') {
   return {
     name: projectName,
     private: true,
@@ -43,6 +44,7 @@ export function buildPackageJson(projectName, platform, appType) {
     flowmo: {
       platform,
       appType,
+      iconLibrary,
     },
     scripts: {
       dev: 'vite --open',

@@ -101,6 +101,31 @@ Use Feedback Message or floating toasts for success states rather than redirecti
 
 Interactive cards should subtly lift on hover (translate + shadow change). Focus states should be visible and distinct from hover.
 
+## Matching a Mockup
+
+Reverse-engineering every design value from pixels is slow and error-prone — a single screen has
+taken 2+ hours and hundreds of measurement passes when the input was a flattened image with no
+extractable text. Most of that cost is avoidable up front.
+
+1. **Prefer a real spec over pixel measurement, in this order:**
+   - Design tokens from Figma (API or Dev Mode), if available — colors, type, and spacing read
+     directly rather than reverse-engineered.
+   - The three values that are cheapest to ask for and most expensive to reverse-engineer: **font
+     families** (letterform identification from a raster is slow and often wrong), the **brand
+     asset path** (a logo file location — don't re-derive a bounding box from pixels to reconstruct
+     something that already exists as a file), and the **base palette**. Ask before measuring.
+   - Only fall back to pixel measurement (ruler/eyedropper on the mockup image) for whatever the
+     above doesn't cover.
+2. **Time-box pixel measurement.** If you're re-measuring the same element repeatedly without
+   landing on a confirmed value, stop and ask rather than continuing to guess — a good rule of
+   thumb is 30 minutes without a confirmed value on one element.
+3. **Persist confirmed values as you find them**, in a scratch file (or the screen's own
+   `README.md` "Mockups" table) rather than only in conversation — re-deriving a value you already
+   measured, because nothing wrote it down, is pure waste across turns.
+4. **Capture screenshots deterministically**: 1× device pixel ratio, the mockup's exact pixel
+   width (not a default viewport), full-page capture. Scale/viewport mismatches between a
+   screenshot and the mockup produce false diffs that look like real layout bugs.
+
 ## Pushing Screens to Real OutSystems
 
 Once a screen prototyped here is validated, pushing it to a real OutSystems app happens through

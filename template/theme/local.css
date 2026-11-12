@@ -1,0 +1,18 @@
+/* ── Local only — never goes to OutSystems ─────────────
+   Compensations that exist purely because the prototype renders outside the
+   platform. The real app gets these from its own runtime and settings, so
+   pasting any of it into the Theme would change screens that aren't ours.
+
+   The test for anything added here — same test as theme.css, inverted:
+     "Would pasting this into the live app's Theme change a screen that
+      isn't ours?"  Yes -> here.  No -> theme.css.
+
+   Starts empty. A common first entry: grid.css hardcodes a max-width that
+   mirrors an OutSystems app-level grid setting — if a screen genuinely needs
+   more width than that, override .ThemeGrid_Container here, not in grid.css
+   itself (grid.css ships as-is; see its own header).
+
+   This file loads locally only — nothing links it automatically. Add
+   <link rel="stylesheet" href="../../theme/local.css"> to a screen once you
+   have something to put in it.
+──────────────────────────────────────────────────────── */

@@ -4,8 +4,13 @@ description: >-
   Local development server setup and screen previewing for Flowmo projects.
   Use when the user wants to run, preview, or open screens in the browser;
   when asked to "start the dev server", "run the project", or "open in browser";
-  or when troubleshooting why screens are not loading. Covers npm run dev,
-  Vite configuration, hot reload, and the screens index page.
+  or when troubleshooting why screens are not loading. Also covers why a local
+  preview or verification harness should under-provide rather than
+  over-provide relative to its real deployment target, and how to diff a
+  local preview against a live app (document.styleSheets, computed-style
+  baselines) when something renders differently live than it did locally.
+  Covers npm run dev, Vite configuration, hot reload, and the screens index
+  page.
 compatibility: Requires Node.js and npm. Designed for VS Code agents working in a scaffolded Flowmo project.
 metadata:
   version: "1.0"
@@ -67,3 +72,52 @@ If port 5173 is already in use, Vite automatically tries the next available port
 - Screens link to shared stylesheets via relative paths: `../theme/outsystems-ui.css`, `../theme/grid.css`, `../theme/theme.css`
 - Scripts are referenced from `../scripts/`
 - These relative paths resolve correctly both through Vite and when opening the file directly in a browser or the Visual Inspector extension
+
+## Local Preview Should Under-Provide, Not Over-Provide
+
+A local preview that's *more permissive* than the real OutSystems target lets real bugs ship
+silently — the preview passes, the live app doesn't. Three ways this bites, all from the same
+root cause:
+
+- **A CDN or resource the target doesn't actually have.** If a real module only installs one icon
+  weight, don't load a broader icon set locally "just in case" — glyphs that render locally but
+  aren't in the live module vanish there with no error.
+- **CSS load order that's more forgiving than the real cascade.** See
+  `outsystems-ui`'s `references/architectural-heuristics.md` §1: a naive local preview loading
+  component CSS last (so it always wins) hides exactly the specificity bugs that ship live, where
+  the real order is different.
+- **A convenience script the target won't have.** If interactive behavior (an accordion, a
+  sortable table) is wired up via a script the local preview always includes, but that script
+  isn't part of what actually ships to the target, the preview will show working interactions that
+  don't exist live.
+
+When you're building a preview or verification harness meant to stand in for a real deployment
+target, default to loading only what that target will actually have — never more. `npx flowmo
+block:build`'s generated `verify.html` follows this rule for OutSystems porting specifically (see
+that command's README section in the `flowmo` package); apply the same instinct anywhere else a
+local preview is standing in for a platform you don't fully control.
+
+## Verifying Against the Live App
+
+Two techniques for catching bugs that only exist once real changes reach the live app —
+`document.styleSheets` and computed CSS agree with what a local preview merely predicts.
+
+**Live-vs-local diffing.** When you have a Playwright (or similar) browser tool and a live target
+to compare against, read the DOM/CSS directly instead of eyeballing a screenshot:
+
+```js
+// via a Playwright browser_evaluate call against the live page
+[...document.styleSheets].map(s => s.href)               // confirms real load order
+getComputedStyle(document.querySelector('.my-card')).backgroundColor  // confirms which rule actually won
+```
+
+This is how a real cascade-order bug gets confirmed rather than guessed at — a rule that *looks*
+like it should win by specificity can still lose if it loads in the wrong position, and only
+reading the live page's actual resolved styles proves which happened.
+
+**Computed-style baseline diffing before/after a refactor.** Before a CSS refactor that touches
+shared selectors (a theme split, a specificity fix), capture computed styles for the selectors and
+breakpoints you're touching; diff byte-for-byte after. A visual screenshot comparison won't catch
+a lost `@media` block or a specificity regression that happens not to move any pixels at the
+breakpoint you happened to check — a computed-style diff will. This works against a local
+`verify.html` just as well as a live page, and needs no MCP or live app at all.

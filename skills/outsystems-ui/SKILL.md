@@ -5,10 +5,15 @@ description: >
   CSS classes. Use when creating .visual.html prototypes, building UI screens,
   styling components, using layout patterns (Cards, Columns, Forms, Tables, Tabs),
   applying spacing, colors, typography, or scaffolding screens — even if the user
-  doesn't mention "OutSystems" explicitly. Covers all 90 UI patterns across 8
-  categories, 16 core widgets, the full screen workflow (generate → self-check →
-  dev server with npm run dev → visual verification), layout components, and
-  the complete design token system (spacing, colors, borders, shadows, typography).
+  doesn't mention "OutSystems" explicitly. Also covers authoring a reusable
+  component under components/business/ (the Component base class contract,
+  interactive components included, demo.js, what makes a component portable to
+  OutSystems via flowmo block:build) — use when asked to create or edit a
+  reusable/shared component, not just a screen.
+  Covers all 90 UI patterns across 8 categories, 16 core widgets, the full
+  screen workflow (generate → self-check → dev server with npm run dev →
+  visual verification), layout components, and the complete design token
+  system (spacing, colors, borders, shadows, typography).
 compatibility: Requires outsystems-ui.css linked in the HTML file. Designed for VS Code agents.
 metadata:
   version: "1.2"
@@ -286,6 +291,12 @@ These behaviors are active in the `outsystems-ui.css` theme and affect visual re
 
 **Load [references/architectural-heuristics.md](references/architectural-heuristics.md)** for deep platform behaviors (OSInline, OSBlockWidget, List Virtualization).
 
+**Load [references/business-components.md](references/business-components.md)** when creating or
+editing anything under `components/business/` — the `Component` base class contract (one contract,
+two levels of ceremony: presentational or interactive), the state-preservation rule, the `demo.js`
+convention, and the `OnReady`/`OnParametersChanged`/`OnDestroy` mapping that make a component
+portable via `npx flowmo block:build` — interactive components included, not just read-only ones.
+
 ## Responsive & Device Classes
 
 OutSystems uses a **JavaScript-based** responsive system, not CSS media queries. A runtime script detects the viewport size and applies device + orientation classes to `<body>`. All OSUI responsive CSS rules are scoped to these body classes.
@@ -374,8 +385,10 @@ Every project ships three CSS files and one JS file, loaded in this order:
 
 1. **`outsystems-ui.css`** — the OSUI framework (patterns, utilities, layout). Never edit this.
 2. **`grid.css`** — platform grid definitions (`.ThemeGrid_Container` max-width, `.ThemeGrid_Width*` columns, `.ThemeGrid_MarginGutter` spacing, `.active-screen` scroll model). Normally injected by OutSystems at runtime — we provide it statically. Never edit this.
-3. **`theme.css`** — project-specific brand tokens and custom styles. This is the only file you should edit.
+3. **`theme.css`** — project-specific brand tokens and custom styles, and the only file that's a candidate to paste into the real app's Theme once you're porting. This is the file you should edit for anything that belongs there.
 4. **`device-detect.js`** (in `scripts/`) — viewport detection script that applies `phone`/`tablet`/`desktop` + `portrait`/`landscape` classes to `<body>`. Required for responsive column breaks and `display-on-device-*` classes. Never edit this.
+5. **`local.css`** (optional, ships empty) — prototype-only compensations that must **never** be pasted into the real app's Theme, because the real app already provides them from its own runtime/settings (e.g. widening `.ThemeGrid_Container` past `grid.css`'s static max-width). Not linked by default — add
+   `<link rel="stylesheet" href="../theme/local.css" />` to a screen once you have something to put in it. See the header comment in `theme/local.css` for the routing test (it's `theme.css`'s test, inverted).
 
 All three `<link>` tags must be present in `<head>`, and the script at the bottom of `<body>`:
 ```html
@@ -417,6 +430,18 @@ All three `<link>` tags must be present in `<head>`, and the script at the botto
 - Don't redefine grid classes (`.ThemeGrid_*`) — those belong in `grid.css`
 - Don't add `@media` queries — OSUI handles responsiveness
 - Don't override `.btn` base styles — create new named classes instead
+
+### Porting: component CSS loads before outsystems-ui.css, not after
+
+The three-file order above is for a static prototype screen and stays correct — `theme.css`
+overriding OSUI's `:root` tokens depends on `theme.css` loading *after* `outsystems-ui.css`, and
+that doesn't change. But once a screen also links a `components/business/<name>/index.css` (see
+`references/business-components.md`), that link needs to go **before** `outsystems-ui.css`, not
+after: a real OutSystems module loads Block CSS before OSUI, so a component rule that merely ties
+an OSUI rule's specificity wins in a naive `outsystems-ui.css`-first local preview but loses live.
+See `references/architectural-heuristics.md` §1 for the full cascade order and why. `npx flowmo
+block:build`'s generated `verify.html` already gets this order right automatically — this note is
+for wiring a component's CSS into a screen's own `.visual.html` by hand.
 
 ### Common OSUI specificity traps
 

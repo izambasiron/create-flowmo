@@ -12,16 +12,16 @@ When a developer wants to mirror their ODC data model into a local Flowmo projec
    | Text | `TEXT` |
    | Integer | `INTEGER` |
    | Long Integer | `BIGINT` |
-   | Decimal | `NUMERIC(18, 2)` |
+   | Decimal | `NUMERIC(18, 2)` (not yet checked against ODC storage; `flowmo schema:pull` emits `NUMERIC(28,8)`) |
    | Boolean | `NUMERIC(28,8)` (ODC stores Boolean as numeric `1`/`0`; compare with `= 1`, not `= TRUE`) |
    | Date Time | `TIMESTAMPTZ` |
    | Date | `TIMESTAMPTZ` (ODC stores Date as timestamptz, not `date`) |
    | Binary Data | `BYTEA` |
    | Email | `TEXT` |
    | Phone Number | `TEXT` |
-   | Currency | `NUMERIC(18, 2)` |
+   | Currency | `NUMERIC(18, 2)` (same caveat as Decimal) |
 
-3. The identifier of a **non-static** entity is auto-number: `SERIAL PRIMARY KEY` for Integer, `BIGSERIAL` for Long Integer. A **static** entity's identifier is a plain `INTEGER PRIMARY KEY` (its ids are fixed records), and a Text identifier stays `TEXT PRIMARY KEY`.
+3. The identifier of a **non-static** entity is auto-number: `SERIAL PRIMARY KEY` for Integer, `BIGSERIAL` for Long Integer. A **static** entity's identifier is a plain key of its id type, `INTEGER` or `BIGINT` (its ids are fixed records), and a Text identifier stays `TEXT PRIMARY KEY`.
 4. OutSystems foreign key attributes (e.g., `UserId`) take the **type of the referenced primary key**: `BIGINT REFERENCES parent_table(id)` for a Long Integer id, `INTEGER` for Integer, `TEXT` for a Text id. If that key is itself a foreign key (an extension entity sharing its parent's id), follow it to the base type.
 5. OutSystems attributes are **NOT NULL by default** — apply `NOT NULL` unless the attribute is explicitly optional.
 6. Add `DEFAULT 1` / `DEFAULT 0` for Boolean (`NUMERIC`) attributes that have a default set.

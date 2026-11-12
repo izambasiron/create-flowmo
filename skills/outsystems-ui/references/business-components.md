@@ -23,16 +23,16 @@ components/shared/
   <name>.js    ← optional — other reusable code any component may import (e.g. esc.js)
 ```
 
-`<kebab-case-name>` (e.g. `job-nav-rail`) becomes a PascalCase component name (`JobNavRail`) when
+`<kebab-case-name>` (e.g. `order-rail`) becomes a PascalCase component name (`OrderRail`) when
 bundled. A screen imports and mounts a component the normal ES-module way:
 
 ```js
-import { JobNavRail } from '../../components/business/job-nav-rail/index.js';
-new JobNavRail({ target: contentSlot, props: { jobNumber: '12345', tabs: JOB_TABS } }).mount();
+import { OrderRail } from '../../components/business/order-rail/index.js';
+new OrderRail({ target: contentSlot, props: { orderNumber: '12345', tabs: ORDER_TABS } }).mount();
 ```
 
 `flowmo block:build` bundles each component into its **own** folder under `dist/outsystems/` —
-`dist/outsystems/JobNavRail/JobNavRail.js` + `JobNavRail.css` — pasted as that component's own
+`dist/outsystems/OrderRail/OrderRail.js` + `OrderRail.css` — pasted as that component's own
 Script resource and Style Sheet. This is deliberate: Service Studio doesn't diff or merge a pasted
 Script resource, so keeping one file per component means two developers working on different
 components never touch the same generated file. See that command's README section in the `flowmo`
@@ -45,9 +45,9 @@ package for the full paste workflow.
 ```js
 import { Component } from '../../shared/Component.js';
 
-export class JobNavRail extends Component {
+export class OrderRail extends Component {
   render() {
-    this.target.innerHTML = `<div class="job-nav-rail">${this.esc(this.props.jobNumber)}</div>`;
+    this.target.innerHTML = `<div class="order-rail">${this.esc(this.props.orderNumber)}</div>`;
   }
 }
 ```
@@ -122,9 +122,9 @@ should use the class contract from the start.
 Use `this.esc(...)` — it's on the base class, so the safe path costs nothing extra to reach for:
 
 ```js
-export class JobNavRail extends Component {
+export class OrderRail extends Component {
   render() {
-    this.target.innerHTML = `<div class="job-nav-rail">${this.esc(this.props.jobNumber)}</div>`;
+    this.target.innerHTML = `<div class="order-rail">${this.esc(this.props.orderNumber)}</div>`;
   }
 }
 ```
@@ -139,8 +139,8 @@ If two components need the same internal shape (e.g. a label/value row) beyond w
 already covers, put it under `components/shared/` and have both import it, rather than copying the
 helper into each component and letting the two drift. A copy is exactly where a fix like the one
 above stops being applied consistently: it lives in the original, not in the copy nobody remembered
-was a copy — this happened for real (`job-voyage-card`'s copy of `job-context-card`'s field helper
-dropped its escaping call; see `flowmo/reviews/2026-08-29-efm-cargo-retro.md` §4). A style shared
+was a copy — this happened for real (`table-status-card`'s copy of `order-summary-card`'s field helper
+dropped its escaping call). A style shared
 across components that isn't JS at all still belongs in `theme.css` as a class both use.
 
 ## CSS: one file, one destination
@@ -157,9 +157,9 @@ whichever rule loads later regardless of whether the two selectors share a name,
 ## `demo.js`: props for previewing before data is wired
 
 ```js
-// components/business/job-nav-rail/demo.js
+// components/business/order-rail/demo.js
 export default {
-  jobNumber: '12345',
+  orderNumber: '12345',
   tabs: [{ label: 'General Details', href: '#', active: true }],
 };
 ```

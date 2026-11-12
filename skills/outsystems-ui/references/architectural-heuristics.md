@@ -5,9 +5,9 @@ Deep technical guide for automated agents interfacing with the OutSystems UI DOM
 ## 1. CSS Load Hierarchy & Scope
 
 **ODC (Developer Cloud), confirmed empirically** by reading `document.styleSheets` on a live
-deployed app (source: `flowmo/reviews/2026-08-29-efm-cargo-retro.md` §2 — corrects this section's
-previous claim, which was written at initial release with no live verification and had the order
-backwards):
+deployed app (this corrects an
+earlier claim in this section, which was written at initial release with no live verification and
+had the order backwards):
 
 1.  **Web Block CSS** — loads *first*. Counter to what you'd expect: a Block's stylesheet is
     bundled module-wide (not scoped to the block) and it is evaluated *before* the platform's own

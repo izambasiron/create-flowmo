@@ -92,39 +92,6 @@ fresh entities to fold them into `schema.os.sql` — `schema:verify` won't do
 that for you automatically. A non-zero exit code means something isn't
 `confirmed` yet — check before assuming the loop is done.
 
-## Pulling from a plain shell pipeline (no agent tool call needed)
-
-Everything above assumes the assistant calls `context_entities` as a native tool. The same relay
-a harness launches internally for that (commonly `outsystems-mcp-relay <remote-url>`) can also be
-driven directly from a shell, independent of any agent's tool-calling interface — useful for a
-scriptable pull (a Makefile target, a pre-demo dry run) or when you specifically want the pull
-step to not depend on an agent being in the loop. It speaks newline-delimited JSON-RPC on
-stdin/stdout:
-
-```bash
-# Keep stdin open — closing it immediately ends the process before it does anything.
-mkfifo relay.in
-outsystems-mcp-relay https://<tenant>.outsystems.dev/mcp < relay.in > relay.out &
-exec 3>relay.in
-
-# Handshake, then the actual call:
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"shell","version":"0.0.1"}}}' >&3
-printf '%s\n' '{"jsonrpc":"2.0","method":"notifications/initialized"}' >&3
-printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"context_entities","arguments":{"app":"<App Name>","owned_only":false}}}' >&3
-
-# Each response is one JSON-RPC line in relay.out. Match on "id" to find the
-# tools/call response (id 2), then parse ITS result.content[0].text as JSON —
-# that nested string is the actual context_entities payload to feed schema:pull.
-
-exec 3>&-   # close the write end
-kill %1     # stop the relay process
-```
-
-This reuses whatever OAuth token is already cached under `~/.mcp-auth/` — no separate login if
-the harness's own connection is already authenticated. If that cached token has expired, see the
-`outsystems-mentor` skill's `SKILL.md` for the `--force` re-auth flow; a token refreshed that way
-is picked up by the harness's own connection too, since they share the same cache.
-
 ## Known MCP limitations relevant to this loop
 
 Entity/schema creation and standard CRUD wiring are Mentor's strongest,
